@@ -1,0 +1,54 @@
+# @package _group_
+common:
+  fp16: true
+  log_format: json
+  log_interval: 200
+
+checkpoint:
+  save_dir: 'bert/baseline/'
+  no_epoch_checkpoints: true
+  save_interval: 5
+  save_interval_updates: 50000
+
+task:
+  _name: masked_lm
+  data: ???
+  sample_break_mode: complete
+  tokens_per_sample: 512
+
+criterion: masked_lm
+
+
+
+optimizer:
+  _name: adam
+  weight_decay: 0.01
+  adam_betas: (0.9,0.98)
+  adam_eps: 1e-06
+
+lr_scheduler:
+  _name: polynomial_decay
+  warmup_updates: 10000
+
+optimization:
+  clip_norm: 0
+  lr: [0.0001]
+  max_update: 1000000
+  update_freq: [1]
+
+model:
+  _name: roberta
+  max_positions: 512
+  dropout: 0.1
+  attention_dropout: 0.1
+
+distributed_training:
+  ddp_backend: no_c10d
+
+dataset:
+  skip_invalid_size_inputs_valid_test: true
+  validate_interval: 5
+  validate_interval_updates: 50000
+  batch_size: 32
+  ignore_unused_valid_subsets: true
+
