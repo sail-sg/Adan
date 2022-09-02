@@ -43,7 +43,7 @@ In all experiments, we set `no-prox=False` in our paper.
 **Step 2.** creat the Adan optimizer as follows. In this step, we can directly replace the vanilla optimizer by using the following command:
 
 ```python
-from adam import Adan
+from adan import Adan
 optimizer = Adan(param, lr=args.lr, weight_decay=args.weight_decay, betas=args.opt_betas, eps = args.opt_eps, max_grad_norm=args.max_grad_norm, no_prox=args.no_prox)
 ```
 
