@@ -31,6 +31,8 @@ parser.add_argument('--opt-eps', default=None, type=float, metavar='EPSILON', he
 parser.add_argument('--opt-betas', default=None, type=float, nargs='+', metavar='BETA', help='optimizer betas in Adan (default: None, use opt default [0.98, 0.92, 0.99] in Adan)')
 parser.add_argument('--no-prox', action='store_true', default=False, help='whether perform weight decay like AdamW (default=False)')
 ```
+`opt-betas` In order to keep consistent with our usage habits, the $\beta$'s in the paper is actually the $(1-\beta)$'s in the code.
+
 `no-prox`: It determines the update rule of parameters with weight decay. By default, Adan updates the parameters in the way presented in Algorithm 1 in the paper:
 
   $$\boldsymbol{\theta}_{k+1} = ( 1+\lambda \eta)^{-1}\left[\boldsymbol{\theta}_k - \boldsymbol{\eta}_k \circ (\mathbf{m}_k+(1-{\color{blue}\beta_2})\mathbf{v}_k)\right],$$_
@@ -51,9 +53,10 @@ optimizer = Adan(param, lr=args.lr, weight_decay=args.weight_decay, betas=args.o
 
 - To make Adan simple, in all experiments except Table 12 in the paper, we do not use the restart strategy in Adan. But Table 12 shows that restart strategy can further slightly improve  the performance of Adan.
 - Adan often allow one to use a large peak learning rate which often fails other optimizers, e.g. Adam and AdamW. For example, in all experiments except for the experiments on MAE pre-training and LSTM, the learning rate used by Adan is **5-10 times** than that in Adam/AdamW.
-- It seems that Adan prefers a large batch size for large-scale experiments, e.g. 2,048 total batch size in our paper. 
+- For vision tasks, but not for NLP and RL tasks, it seems that Adan prefers a large batch size for large-scale experiments, e.g. 2,048 total batch size in our paper. 
 - Adan is relatively robust to `beta1`, `beta2` and `beta3`, especially for `beta2`. If you hope better performance, you can first tune `beta3` and then `beta1`.  
 - Interestingly, we found that `weight_decay = 0.02` is suitable for all experiments in our paper.
+- In your training, if you already fully use the GPU memory when using other optimizers, then you may need to scale the batch size slightly smaller (accordingly linearly scaling LR, etc.) when using Adan, since Adan has slightly higher GPU memory cost than others.
 
 #### 3) More extra detailed steps to reproduce experimental results in paper 
 
@@ -72,21 +75,21 @@ Please refer to the following links for detailed steps. In these detailed steps,
 
 For your convenience to use Adan, we provide the configs and log files for the experiments on ImageNet-1k.
 
-| Model         |  Epoch  | Training Setting | Acc. (%) |                            Config                            |                           Download                           |
-| ------------- | :-----: | :-----: | :------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| ViT-S         |   150   |    I    |   80.1   | [config](./CV/timm/exp_results/ViT/small/args_vit-s_150-I.yaml) | [log](./CV/timm/exp_results/ViT/small/summary_vit-s_150-I.csv)/model |
-| ViT-S         |   150   |   II    |   79.6   | [config](./CV/timm/exp_results/ViT/small/args_vit-s_150.yaml) |  [log](./CV/timm/exp_results/ViT/small/summary_vit-s_150.csv)/model  |
-| ViT-S         |   300   |    I    |   81.1   | [config](./CV/timm/exp_results/ViT/small/args_vit-s_300-I.yaml) | [log](./CV/timm/exp_results/ViT/small/summary_vit-s_300-I.csv)/model |
-| ViT-S         |   300   |   II    |   80.7   | [config](./CV/timm/exp_results/ViT/small/args_vit-s_300.yaml) | [log](./CV/timm/exp_results/ViT/small/summary_vit-s_300.csv)/model |
-| ViT-B         |   150   |   II    |   81.7   | [config](./CV/timm/exp_results/ViT/base/args_vit-B_150.yaml) | [log](./CV/timm/exp_results/ViT/base/summary_vit-B_150.csv)/model |
-| ViT-B         |   300   |   II    |   82.3   | [config](./CV/timm/exp_results/ViT/base/args_vit-B_300.yaml) | [log](./CV/timm/exp_results/ViT/base/summary_vit-B_300.csv)/model |
-| ResNet-50     |   100   |    I    |   78.1   | [config](./CV/timm/exp_results/ResNet/Res50/args_res50_100.yaml) | [log](./CV/timm/exp_results/ResNet/Res50/summary_res50_100.csv)/model |
-| ResNet-50     |   200   |    I    |   79.7   |   [config](./exp_results/ResNet/Res50/args_res50_200.yaml)   | [log](./exp_results/ResNet/Res50/summary_res50_200.csv)/model |
-| ResNet-50     |   300   |    I    |   80.2   | [config](./CV/timm/exp_results/ResNet/Res50/args_res50_300.yaml) | [log](./CV/timm/exp_results/ResNet/Res50/summary_res50_300.csv)/model |
-| ConvNext-tiny |   150   |   II    |   81.7   | [config](./CV/timm/exp_results/ConvNext/small/args_cvnext_150.yaml) | [log](./CV/timm/exp_results/ConvNext/small/summary_cvnext_150.csv)//model |
-| ConvNext-tiny |   300   |   II    |   82.4   | [config](./CV/timm/exp_results/ConvNext/small/args_cvnext_300.yaml) | [log](./CV/timm/exp_results/ConvNext/small/summary_cvnext_300.csv)/model |
-| MAE-small     | 800+100 |   ---   |   83.8   |                 [config](./CV/MAE/README.md)                 | [log-pretrain](./CV/MAE/exp_results/MAE/base/log_base_pretrain.txt)/[log-finetune](./CV/MAE/exp_results/MAE/base/log_base_ft.txt)/model |
-| MAE-Large     | 800+50  |   ---   |   85.9   |                 [config](./CV/MAE/README.md)                 | [log-pretrain](./CV/MAE/exp_results/MAE/large/log_large_pretrain.txt)/[log-finetune](./CV/MAE/exp_results/MAE/large/log_large_ft.txt)/model |
+| Model         |  Epoch  | Training Setting | Acc. (%) |                            Config                            |                            Batch Size                            |                           Download                           |
+| ------------- | :-----: | :-----: | :------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| ViT-S         |   150   |    I    |   80.1   | [config](./CV/timm/exp_results/ViT/small/args_vit-s_150-I.yaml) | 2048 | [log](./CV/timm/exp_results/ViT/small/summary_vit-s_150-I.csv)/model |
+| ViT-S         |   150   |   II    |   79.6   | [config](./CV/timm/exp_results/ViT/small/args_vit-s_150.yaml) | 2048 |  [log](./CV/timm/exp_results/ViT/small/summary_vit-s_150.csv)/model  |
+| ViT-S         |   300   |    I    |   81.1   | [config](./CV/timm/exp_results/ViT/small/args_vit-s_300-I.yaml) | 2048 | [log](./CV/timm/exp_results/ViT/small/summary_vit-s_300-I.csv)/model |
+| ViT-S         |   300   |   II    |   80.7   | [config](./CV/timm/exp_results/ViT/small/args_vit-s_300.yaml) | 2048 | [log](./CV/timm/exp_results/ViT/small/summary_vit-s_300.csv)/model |
+| ViT-B         |   150   |   II    |   81.7   | [config](./CV/timm/exp_results/ViT/base/args_vit-B_150.yaml) | 2048 | [log](./CV/timm/exp_results/ViT/base/summary_vit-B_150.csv)/model |
+| ViT-B         |   300   |   II    |   82.3   | [config](./CV/timm/exp_results/ViT/base/args_vit-B_300.yaml) | 2048 | [log](./CV/timm/exp_results/ViT/base/summary_vit-B_300.csv)/model |
+| ResNet-50     |   100   |    I    |   78.1   | [config](./CV/timm/exp_results/ResNet/Res50/args_res50_100.yaml) | 2048 | [log](./CV/timm/exp_results/ResNet/Res50/summary_res50_100.csv)/model |
+| ResNet-50     |   200   |    I    |   79.7   |   [config](./exp_results/ResNet/Res50/args_res50_200.yaml)   |   2048   | [log](./exp_results/ResNet/Res50/summary_res50_200.csv)/model |
+| ResNet-50     |   300   |    I    |   80.2   | [config](./CV/timm/exp_results/ResNet/Res50/args_res50_300.yaml) | 2048 | [log](./CV/timm/exp_results/ResNet/Res50/summary_res50_300.csv)/model |
+| ConvNext-tiny |   150   |   II    |   81.7   | [config](./CV/timm/exp_results/ConvNext/small/args_cvnext_150.yaml) | 2048 | [log](./CV/timm/exp_results/ConvNext/small/summary_cvnext_150.csv)//model |
+| ConvNext-tiny |   300   |   II    |   82.4   | [config](./CV/timm/exp_results/ConvNext/small/args_cvnext_300.yaml) | 2048 | [log](./CV/timm/exp_results/ConvNext/small/summary_cvnext_300.csv)/model |
+| MAE-small     | 800+100 |   ---   |   83.8   |                 [config](./CV/MAE/README.md)                 |                 4096/2048                 | [log-pretrain](./CV/MAE/exp_results/MAE/base/log_base_pretrain.txt)/[log-finetune](./CV/MAE/exp_results/MAE/base/log_base_ft.txt)/model |
+| MAE-Large     | 800+50  |   ---   |   85.9   |                 [config](./CV/MAE/README.md)                 |                 4096/2048                 | [log-pretrain](./CV/MAE/exp_results/MAE/large/log_large_pretrain.txt)/[log-finetune](./CV/MAE/exp_results/MAE/large/log_large_ft.txt)/model |
 
 
 
@@ -99,9 +102,9 @@ We give the configs and log files of the BERT-base model pre-trained on the Book
 
 
 
-| Pretraining | Config  |  Log   | Model  |
-| --------- | :--------: | :--------- | :--------: |
-| Adan      |  [config](./NLP/BERT/config/pretraining/bert-adan.yaml)  |   [log](./NLP/BERT/exp_results/pretrain/hydra_train-adan.log)   | model |
+| Pretraining | Config  | Batch Size |  Log   | Model  |
+| --------- | :--------: | :--------: | :--------: | :--------: |
+| Adan      |  [config](./NLP/BERT/config/pretraining/bert-adan.yaml)  |  256  |   [log](./NLP/BERT/exp_results/pretrain/hydra_train-adan.log)   | model |
 
 
 | Fine-tuning on GLUE-Task | Metric                       |  Result   |                         Config                          |
@@ -114,11 +117,13 @@ We give the configs and log files of the BERT-base model pre-trained on the Book
 | QNLI      | Accuracy                     |   91.3    |  [config](./NLP/BERT/config/finetuning/qnli-adan.yaml)  |
 | RTE       | Accuracy                     |   73.3    |  [config](./NLP/BERT/config/finetuning/rte-adan.yaml)   |
 
+For fine-tuning on GLUE-Task, see the total batch size in their corresponding configure files.
+
 
 
 #### Transformer-XL-base 
 
-We provide the config and log for Transformer-XL-base trained on the WikiText-103 dataset.
+We provide the config and log for Transformer-XL-base trained on the WikiText-103 dataset. The total batch size for this experiment is `60*4`.
 
 |                     | Steps | Test PPL |                          Download                           |
 | ------------------- | :---: | :------: | :---------------------------------------------------------: |

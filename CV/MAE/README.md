@@ -65,7 +65,7 @@ if args.use_adan:
 
 ```python
 python main_pretrain.py \
-    --batch_size 256 --accum_iter 1 \
+    --batch_size ${BS} --accum_iter 1 \
     --model ${MODEL_NAME} --norm_pix_loss --mask_ratio 0.75 \
     --epochs 800 \
     --lr ${LR}  --weight_decay 0.02 --warmup_epochs ${WR_EPOCH} \
@@ -80,10 +80,10 @@ python main_pretrain.py \
 - We use **16** A100 GPUs for MAE-Base and **32** A100 GPUs for MAE-Large.
 - There are some differences between hyper-parameters for MAE-Base and MAE-Large
 
-|           |      MODEL_NAME       |   LR   | MIN_LR | WR_EPOCH |
-| :-------: | :-------------------: | :----: | :----: | :------: |
-| MAE-Base  | mae_vit_base_patch16  | 2.0e-3 |  1e-8  |    40    |
-| MAE-Large | mae_vit_large_patch16 | 2.2e-3 |  1e-4  |    80    |
+|           |      MODEL_NAME       |   LR   |  BS  | MIN_LR | WR_EPOCH |
+| :-------: | :-------------------: | :----: | :--: | :----: | :------: |
+| MAE-Base  | mae_vit_base_patch16  | 2.0e-3 | 256  |  1e-8  |    40    |
+| MAE-Large | mae_vit_large_patch16 | 2.2e-3 | 128  |  1e-4  |    80    |
 
 
 
@@ -92,7 +92,7 @@ python main_pretrain.py \
 ```python
 python main_finetune.py \
   --accum_iter 1 \
-  --batch_size 256 \
+  --batch_size ${BS} \
   --model ${MODEL_NAME} \
   --finetune  ${PATH to Ptr-trained Model} \
   --epochs ${EPOCH} \
@@ -110,10 +110,10 @@ python main_finetune.py \
 - We use **16** A100 GPUs for MAE-Base and **32** A100 GPUs for MAE-Large.
 - There are some differences between hyper-parameters for MAE-Base and MAE-Large
 
-|           |    MODEL_NAME     | EPOCH | MIN_LR | LAYER_DECAY | WR_EPOCH | WD   | DROP_PATH |
-| :-------: | :---------------: | :---: | :----: | :---------: | :------: | ---- | :-------: |
-| MAE-Base  | vit_base_patch16  |  100  |  1e-6  |    0.65     |    40    | 5e-3 |    0.1    |
-| MAE-Large | vit_large_patch16 |  50   |  1e-5  |    0.75     |    10    | 1e-3 |    0.2    |
+|           |    MODEL_NAME     | EPOCH | MIN_LR |  BS  | LAYER_DECAY | WR_EPOCH | WD   | DROP_PATH |
+| :-------: | :---------------: | :---: | :----: | :--: | :---------: | :------: | ---- | :-------: |
+| MAE-Base  | vit_base_patch16  |  100  |  1e-6  | 128  |    0.65     |    40    | 5e-3 |    0.1    |
+| MAE-Large | vit_large_patch16 |  50   |  1e-5  |  64  |    0.75     |    10    | 1e-3 |    0.2    |
 
 
 
