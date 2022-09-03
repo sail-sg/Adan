@@ -16,7 +16,6 @@
 import math
 import torch
 from torch.optim.optimizer import Optimizer
-from timm.utils import *
 
 
 class Adan(Optimizer):
@@ -136,7 +135,6 @@ class Adan(Optimizer):
                 exp_avg, exp_avg_sq, exp_avg_diff = state['exp_avg'], state['exp_avg_sq'], state['exp_avg_diff']
                 diff = grad - state['pre_grad']
 
-                update = grad + beta2 * diff
                 exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)  # m_t
                 exp_avg_diff.mul_(beta2).add_(diff, alpha=1 - beta2)  # diff_t
                 exp_avg_sq.mul_(beta3).addcmul_(update, update, value=1 - beta3)  # n_t
