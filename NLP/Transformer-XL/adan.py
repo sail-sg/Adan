@@ -16,7 +16,6 @@
 import math
 import torch
 from torch.optim.optimizer import Optimizer
-from timm.utils import *
 
 
 class Adan(Optimizer):
