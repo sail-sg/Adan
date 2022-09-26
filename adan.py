@@ -79,10 +79,16 @@ class Adan(Optimizer):
                     state['exp_avg_diff'] = torch.zeros_like(p)
 
     @torch.no_grad()
-    def step(self):
+    def step(self, closure=None):
         """
             Performs a single optimization step.
         """
+
+        loss = None
+        if closure is not None:
+            with torch.enable_grad():
+                loss = closure()
+
         if self.defaults['max_grad_norm'] > 0:
             device = self.param_groups[0]['params'][0].device
             global_grad_norm = torch.zeros(1, device=device)
@@ -151,3 +157,5 @@ class Adan(Optimizer):
                     p.data.div_(1 + group['lr'] * group['weight_decay'])
 
                 state['pre_grad'] = copy_grad
+        
+        return loss
