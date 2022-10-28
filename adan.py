@@ -38,11 +38,11 @@ class Adan(Optimizer):
             global grad norm (default: 0.0 no clip)
         no_prox (bool): how to perform the decoupled weight decay (default: False)
         foreach (bool): if True would use torch._foreach implementation. It's faster but uses
-            slightly more memory.
+            slightly more memory. (default: True)
     """
 
     def __init__(self, params, lr=1e-3, betas=(0.98, 0.92, 0.99), eps=1e-8,
-                 weight_decay=0.0, max_grad_norm=0.0, no_prox=False, foreach: bool=False):
+                 weight_decay=0.0, max_grad_norm=0.0, no_prox=False, foreach: bool=True):
         if not 0.0 <= max_grad_norm:
             raise ValueError("Invalid Max grad norm: {}".format(max_grad_norm))
         if not 0.0 <= lr:
@@ -82,10 +82,16 @@ class Adan(Optimizer):
                     state['exp_avg_diff'] = torch.zeros_like(p)
 
     @torch.no_grad()
-    def step(self):
+    def step(self, closure=None):
         """
             Performs a single optimization step.
         """
+
+        loss = None
+        if closure is not None:
+            with torch.enable_grad():
+                loss = closure()
+
         if self.defaults['max_grad_norm'] > 0:
             device = self.param_groups[0]['params'][0].device
             global_grad_norm = torch.zeros(1, device=device)
@@ -170,9 +176,11 @@ class Adan(Optimizer):
             else:
                 copy_grads = _single_tensor_adan(**kwargs)
 
-            for p, copy_grad in zip(group['params'], copy_grads):
+            for p, copy_grad in zip(params_with_grad, copy_grads):
                 self.state[p]['pre_grad'] = copy_grad
-
+        
+        return loss
+        
 def _single_tensor_adan(
     params: List[Tensor],
     grads: List[Tensor],
@@ -242,15 +250,14 @@ def _multi_tensor_adan(
     no_prox: bool,
     clip_global_grad_norm: Tensor,
 ):
-
-    torch._foreach_mul_(grads, clip_global_grad_norm)
+    if clip_global_grad_norm<1.0:
+        torch._foreach_mul_(grads, clip_global_grad_norm.item())
     copy_grads = [g.clone() for g in grads]
 
     diff = torch._foreach_sub(grads, pre_grads)
     # NOTE: line below while looking identical gives different result, due to float precision errors.
     # using mul+add produces identical results to single-tensor, using add+alpha doesn't
-    # this line is only needed for tests to pass. on cuda this difference doesn't matter due
-    # to its' own precision non-determinism
+    # On cuda this difference doesn't matter due to its' own precision non-determinism
     # update = torch._foreach_add(grads, torch._foreach_mul(diff, beta2))
     update = torch._foreach_add(grads, diff, alpha=beta2)
 
@@ -269,7 +276,7 @@ def _multi_tensor_adan(
 
     update = torch._foreach_div(exp_avgs, bias_correction1)
     # NOTE: same issue as above. beta2 * diff / bias_correction2 != diff * (beta2 / bias_correction2)
-    # using faster version by default. uncomment for tests to pass
+    # using faster version by default. 
     # torch._foreach_add_(update, torch._foreach_div(torch._foreach_mul(exp_avg_diffs, beta2), bias_correction2))
     torch._foreach_add_(update, torch._foreach_mul(exp_avg_diffs, beta2 / bias_correction2))
     torch._foreach_div_(update, denom)

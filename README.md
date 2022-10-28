@@ -16,6 +16,17 @@ This is an official PyTorch implementation of **Adan**. See paper [here](https:/
 
 
 
+---
++ :fire: :fire: Faster implementation are released. 
+
++ Adan is supported in the lasted version of [`timm`](https://github.com/rwightman/pytorch-image-models).
++ TF's implementation (third party) refers to [DenisVorotyntsev/Adan](https://github.com/DenisVorotyntsev/Adan).
++ JAX's version (third party) is implemented and also supported in [Deepmind/optax](https://github.com/deepmind/optax).
+
+---
+
+
+
 ## Usage
 
 For your convenience to use Adan, we briefly provide some intuitive instructions below, then provide some general experimental tips, and finally give more details (e.g. specific commonds and hyper-parameters) for each experiment in the paper. 
@@ -82,10 +93,13 @@ For your convenience to use Adan, we provide the configs and log files for the e
 | ViT-S         |   300   |    I    |   81.1   | [config](./CV/timm/exp_results/ViT/small/args_vit-s_300-I.yaml) | 2048 | [log](./CV/timm/exp_results/ViT/small/summary_vit-s_300-I.csv)/model |
 | ViT-S         |   300   |   II    |   80.7   | [config](./CV/timm/exp_results/ViT/small/args_vit-s_300.yaml) | 2048 | [log](./CV/timm/exp_results/ViT/small/summary_vit-s_300.csv)/model |
 | ViT-B         |   150   |   II    |   81.7   | [config](./CV/timm/exp_results/ViT/base/args_vit-B_150.yaml) | 2048 | [log](./CV/timm/exp_results/ViT/base/summary_vit-B_150.csv)/model |
-| ViT-B         |   300   |   II    |   82.3   | [config](./CV/timm/exp_results/ViT/base/args_vit-B_300.yaml) | 2048 | [log](./CV/timm/exp_results/ViT/base/summary_vit-B_300.csv)/model |
+| ViT-B         |   300   |   II    |   82.6   | [config](./CV/timm/exp_results/ViT/base/args_vit-B_300_T.yaml) | 2048 | [log](./CV/timm/exp_results/ViT/base/summary_vit-B_300_T.csv)/model |
 | ResNet-50     |   100   |    I    |   78.1   | [config](./CV/timm/exp_results/ResNet/Res50/args_res50_100.yaml) | 2048 | [log](./CV/timm/exp_results/ResNet/Res50/summary_res50_100.csv)/model |
-| ResNet-50     |   200   |    I    |   79.7   |   [config](./exp_results/ResNet/Res50/args_res50_200.yaml)   |   2048   | [log](./exp_results/ResNet/Res50/summary_res50_200.csv)/model |
+| ResNet-50     |   200   |    I    |   79.7   |   [config](./CV/timm/exp_results/ResNet/Res50/args_res50_200.yaml)   |   2048   | [log](./CV/timm/exp_results/ResNet/Res50/summary_res50_200.csv)/model |
 | ResNet-50     |   300   |    I    |   80.2   | [config](./CV/timm/exp_results/ResNet/Res50/args_res50_300.yaml) | 2048 | [log](./CV/timm/exp_results/ResNet/Res50/summary_res50_300.csv)/model |
+| ResNet-101 | 100 | I | 80.0 | [config](./CV/timm/exp_results/ResNet/Res101/args_res101_100.yaml) | 2048 | [log](./CV/timm/exp_results/ResNet/Res101/summary_res101_100.csv)/model |
+| ResNet-101 | 200 | I | 81.6 | [config](./CV/timm/exp_results/ResNet/Res101/args_res101_200.yaml) | 2048 | [log](./CV/timm/exp_results/ResNet/Res101/summary_res101_200.csv)/model |
+| ResNet-101 | 300 | I | 81.9 | [config](./CV/timm/exp_results/ResNet/Res101/args_res101_300.yaml) | 2048 | [log](./CV/timm/exp_results/ResNet/Res101/summary_res101_300.csv)/model |
 | ConvNext-tiny |   150   |   II    |   81.7   | [config](./CV/timm/exp_results/ConvNext/small/args_cvnext_150.yaml) | 2048 | [log](./CV/timm/exp_results/ConvNext/small/summary_cvnext_150.csv)//model |
 | ConvNext-tiny |   300   |   II    |   82.4   | [config](./CV/timm/exp_results/ConvNext/small/args_cvnext_300.yaml) | 2048 | [log](./CV/timm/exp_results/ConvNext/small/summary_cvnext_300.csv)/model |
 | MAE-small     | 800+100 |   ---   |   83.8   |                 [config](./CV/MAE/README.md)                 |                 4096/2048                 | [log-pretrain](./CV/MAE/exp_results/MAE/base/log_base_pretrain.txt)/[log-finetune](./CV/MAE/exp_results/MAE/base/log_base_ft.txt)/model |
