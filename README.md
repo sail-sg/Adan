@@ -22,7 +22,7 @@ This is an official PyTorch implementation of **Adan**. See paper [here](https:/
 + Adan is supported in the lasted version of [`timm`](https://github.com/rwightman/pytorch-image-models).
 + TF's implementation (third party) refers to [DenisVorotyntsev/Adan](https://github.com/DenisVorotyntsev/Adan).
 + JAX's version (third party) is implemented and also supported in [Deepmind/optax](https://github.com/deepmind/optax).
-
++ Adan is supported in the [MMClassification](https://github.com/open-mmlab/mmclassification/tree/dev-1.x) of the [OpenMMLab](https://openmmlab.com/) project. The user can find the log and example of using Adan to train ViT-B [here](https://github.com/open-mmlab/mmclassification/pull/1180).
 ---
 
 
