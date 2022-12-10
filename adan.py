@@ -276,6 +276,8 @@ def _multi_tensor_adan(
     no_prox: bool,
     clip_global_grad_norm: Tensor,
 ):
+    if len(params) == 0:
+        return
 
     torch._foreach_mul_(grads, clip_global_grad_norm)
 
