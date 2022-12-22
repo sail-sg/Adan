@@ -23,6 +23,12 @@ This is an official PyTorch implementation of **Adan**. See the paper [here](htt
 
 ______________________________________________________________________
 
+## Installation
+
+```
+python3 -m pip install git+https://github.com/sail-sg/Adan.git
+```
+
 ## Usage
 
 For your convenience to use Adan, we briefly provide some intuitive instructions below, then provide some general experimental tips, and finally provide more details (e.g., specific commands and hyper-parameters) for each experiment in the paper.
