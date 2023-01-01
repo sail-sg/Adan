@@ -17,6 +17,8 @@ ______________________________________________________________________
 
 - Adan is supported in the lasted version of [`Timm`](https://github.com/rwightman/pytorch-image-models).
 
+- Adan is chosen as the default optimizer in the text-to-3D DreamFusion Project [`Stable-Dreamfusion`](https://github.com/ashawkey/stable-dreamfusion).
+
 - TF's implementation (third party) refers to [DenisVorotyntsev/Adan](https://github.com/DenisVorotyntsev/Adan).
 
 - JAX's version (third party) is implemented and also supported in [Deepmind/optax](https://github.com/deepmind/optax).
