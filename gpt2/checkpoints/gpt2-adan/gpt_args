@@ -1,0 +1,21 @@
+--num-layers 24
+--hidden-size 1024
+--num-attention-heads 16
+--seq-length 2048
+--max-position-embeddings 2048
+--micro-batch-size 10
+--global-batch-size 400
+--lr 0.0025
+--optimizer adan
+--train-iters 150000
+--lr-decay-iters 150000
+--lr-decay-style cosine
+--lr-warmup-iters 4000
+--weight-decay .05
+--adan-beta3 .95
+--fp16
+--log-interval 10
+--save-interval 5000
+--eval-interval 200
+--eval-iters 10
+--clip-grad 1.0

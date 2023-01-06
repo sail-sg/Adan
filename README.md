@@ -11,18 +11,14 @@ This is an official PyTorch implementation of **Adan**. See the paper [here](htt
 }
 ```
 
-______________________________________________________________________
+## News
 
 - :fire: :fire: :fire:Faster implementation with less memory footprint is released.
-
 - Adan is supported in the lasted version of [`Timm`](https://github.com/rwightman/pytorch-image-models).
-
-- Adan is chosen as the default optimizer in the text-to-3D DreamFusion Project [`Stable-Dreamfusion`](https://github.com/ashawkey/stable-dreamfusion).
-
+- Results on large language models, like **GPT2**, are released.
+- Adan is chosen as the default optimizer in the text-to-3D [DreamFusion Project](https://github.com/ashawkey/stable-dreamfusion). See more results [here](./dreamfusion/).
 - TF's implementation (third party) refers to [DenisVorotyntsev/Adan](https://github.com/DenisVorotyntsev/Adan).
-
 - JAX's version (third party) is implemented and also supported in [Deepmind/optax](https://github.com/deepmind/optax).
-
 - Adan is supported in the [MMClassification](https://github.com/open-mmlab/mmclassification/tree/dev-1.x) of the [OpenMMLab](https://openmmlab.com/) project. The user can find the log and example of using Adan to train ViT-B [here](https://github.com/open-mmlab/mmclassification/pull/1180).
 
 ______________________________________________________________________
@@ -71,7 +67,7 @@ optimizer = Adan(param, lr=args.lr, weight_decay=args.weight_decay, betas=args.o
 - Interestingly, we found that `weight_decay = 0.02` is suitable for all experiments in our paper.
 - Adan has a slightly higher GPU memory cost than Adam/AdamW on a single node. However, this problem can be solved using the [ZeroRedundancyOptimizer](https://pytorch.org/tutorials/recipes/zero_redundancy_optimizer.html), which shares optimizer states across distributed data-parallel processes to reduce per-process memory footprint. Specifically, when using the `ZeroRedundancyOptimizer` on more than two GPUs, **Adan and Adam consume almost the same amount of memory.**
 
-#### 3) More extra detailed steps to reproduce experimental results in the paper
+#### 3) More extra detailed steps&results
 
 Please refer to the following links for detailed steps. In these detailed steps, we even include the **docker images** for reproducibility.
 
@@ -79,6 +75,8 @@ Please refer to the following links for detailed steps. In these detailed steps,
 - [Instruction](./CV/MAE/) for **<u>MAE</u>**.
 - [Instruction](./NLP/BERT/) for **<u>BERT</u>**.
 - [Instruction](./NLP/Transformer-XL/) for **<u>Transformer-XL</u>**.
+- [Instruction](./gpt2/) for **<u>GPT2</u>**
+- [Resutls](./dreamfusion/) for **<u> text-to-3D DreamFusion</u>**.
 
 ## Model Zoo
 
@@ -109,7 +107,7 @@ For your convenience to use Adan, we provide the configs and log files for the e
 
 #### BERT-base
 
-We give the configs and log files of the BERT-base model pre-trained on the Bookcorpus and Wikipedia datasets and fine-tuned on GLUE tasks. Note, we provide the config and log file, and detailed [instruction](./NLP/BERT/README.md) for BERT-base in the folder `./NLP/BERT`.
+We give the configs and log files of the BERT-base model pre-trained on the Bookcorpus and Wikipedia datasets and fine-tuned on GLUE tasks. Note that we provide the config, log file, and detailed [instructions](./NLP/BERT/README.md) for BERT-base in the folder `./NLP/BERT`.
 
 | Pretraining |                         Config                         | Batch Size |                             Log                             | Model |
 | ----------- | :----------------------------------------------------: | :--------: | :---------------------------------------------------------: | :---: |
@@ -137,3 +135,25 @@ We provide the config and log for Transformer-XL-base trained on the WikiText-10
 | Transformer-XL-base |  50k  |   26.2   | [log&config](./NLP/Transformer-XL/exp_results/log-50k.txt)  |
 | Transformer-XL-base | 100k  |   24.2   | [log&config](./NLP/Transformer-XL/exp_results/log-100k.txt) |
 | Transformer-XL-base | 200k  |   23.5   | [log&config](./NLP/Transformer-XL/exp_results/log-200k.txt) |
+
+### Results on Large Language Models
+
+#### GPT2-345m
+
+We provide the config and log for GPT2-345m trained on the [HumanEval](https://github.com/openai/human-eval) dataset, which is used to measure functional correctness for synthesizing programs from docstrings. It consists of 164 original programming problems, assessing language comprehension, algorithms, and simple mathematics, with some comparable to simple software interview questions. We set ` Temperature = 0.8` during evaluation.
+
+|                  | Steps | pass@1 | pass@10 | pass@100 |                                  Download                                  |
+| ---------------- | :---: | :----: | :-----: | :------: | :------------------------------------------------------------------------: |
+| GPT2-345m (Adam) | 300k  | 0.0840 |  0.209  |  0.360   | [log&config](https://github.com/sail-sg/Adan/files/10362486/gpt2-adam.log) |
+| GPT2-345m (Adan) | 150k  | 0.0843 |  0.221  |  0.377   | [log&config](https://github.com/sail-sg/Adan/files/10362485/gpt2-adan.log) |
+
+<u>**Adan obtains comparable results with only half cost**</u>.
+
+### Results on Diffusion Models
+
+We show the results of the text-to-3D task supported by the [DreamFusion Project](https://github.com/ashawkey/stable-dreamfusion). More visualization results could be founded [here](./dreamfusion/).
+Examples generated from text prompt `Sydney opera house, aerial view` with Adam and Adan:
+
+https://user-images.githubusercontent.com/10042844/211014601-da430196-021d-4f6b-962b-8441feff5d02.mp4
+
+https://user-images.githubusercontent.com/10042844/211014594-3b5c05e3-9018-4a39-b5db-d6f2fc111cce.mp4
