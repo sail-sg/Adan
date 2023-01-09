@@ -140,7 +140,7 @@ We provide the config and log for Transformer-XL-base trained on the WikiText-10
 
 #### GPT2-345m
 
-We provide the config and log for GPT2-345m trained on the [HumanEval](https://github.com/openai/human-eval) dataset, which is used to measure functional correctness for synthesizing programs from docstrings. It consists of 164 original programming problems, assessing language comprehension, algorithms, and simple mathematics, with some comparable to simple software interview questions. We set ` Temperature = 0.8` during evaluation.
+We provide the config and log for GPT2-345m pre-trained on the dataset that comes from [BigCode](https://www.bigcode-project.org/) and evaluated on the [HumanEval](https://github.com/openai/human-eval) dataset by zero-shot learning. [HumanEval](https://github.com/openai/human-eval) is used to measure functional correctness for synthesizing programs from docstrings. It consists of 164 original programming problems, assessing language comprehension, algorithms, and simple mathematics, with some comparable to simple software interview questions. We set ` Temperature = 0.8` during evaluation.
 
 |                  | Steps | pass@1 | pass@10 | pass@100 |                                  Download                                  |
 | ---------------- | :---: | :----: | :-----: | :------: | :------------------------------------------------------------------------: |

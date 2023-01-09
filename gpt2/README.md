@@ -1,6 +1,6 @@
 # Adan: Adaptive Nesterov Momentum Algorithm for Faster Optimizing Deep Models
 
-This experiment is based on the warped repo of [Megatron-LM](https://github.com/bigcode-project/Megatron-LM). And the task is code generalization.
+This experiment is based on the warped repo of [Megatron-LM](https://github.com/bigcode-project/Megatron-LM), provided by [BigCode](https://www.bigcode-project.org/). And the task of this experiment is code generalization.
 
 ## Usage of Adan in Megatron-LM
 
@@ -45,7 +45,7 @@ group.add_argument('--optimizer', type=str, default='adam',
 
 ## Data Preparation
 
-**Step 1.** download the dataset used for pre-training:
+**Step 1.** download the dataset used for pre-training. The dataset is collected and released by [BigCode](https://www.bigcode-project.org/) project:
 
 ```python
 python ./download_dataset.py
@@ -90,7 +90,7 @@ python tools/preprocess_data.py \
 
 ## Results and Logs on GPT2-345m
 
-We provide the config and log for GPT2-345m trained on the [HumanEval](https://github.com/openai/human-eval) dataset, which is used to measure functional correctness for synthesizing programs from docstrings. It consists of 164 original programming problems, assessing language comprehension, algorithms, and simple mathematics, with some comparable to simple software interview questions. We set ` Temperature = 0.8` during evaluation.
+We provide the config and log for GPT2-345m pre-trained on the dataset that comes from [BigCode](https://www.bigcode-project.org/) and evaluated on the [HumanEval](https://github.com/openai/human-eval) dataset by zero-shot learning. [HumanEval](https://github.com/openai/human-eval) is used to measure functional correctness for synthesizing programs from docstrings. It consists of 164 original programming problems, assessing language comprehension, algorithms, and simple mathematics, with some comparable to simple software interview questions. We set ` Temperature = 0.8` during evaluation.
 
 |                  | Steps | pass@1 | pass@10 | pass@100 |                                  Download                                  |
 | ---------------- | :---: | :----: | :-----: | :------: | :------------------------------------------------------------------------: |
