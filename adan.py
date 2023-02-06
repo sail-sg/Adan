@@ -19,6 +19,7 @@ import torch
 from torch import Tensor
 from torch.optim.optimizer import Optimizer
 
+from torch.utils.cpp_extension import load
 
 class Adan(Optimizer):
     """
@@ -52,7 +53,8 @@ class Adan(Optimizer):
                  weight_decay=0.0,
                  max_grad_norm=0.0,
                  no_prox=False,
-                 foreach: bool = True):
+                 foreach: bool = True,
+                 fused: bool = False):
         if not 0.0 <= max_grad_norm:
             raise ValueError('Invalid Max grad norm: {}'.format(max_grad_norm))
         if not 0.0 <= lr:
@@ -74,7 +76,8 @@ class Adan(Optimizer):
                         weight_decay=weight_decay,
                         max_grad_norm=max_grad_norm,
                         no_prox=no_prox,
-                        foreach=foreach)
+                        foreach=foreach,
+                        fused=fused)
         super().__init__(params, defaults)
 
     def __setstate__(self, state):
@@ -191,7 +194,14 @@ class Adan(Optimizer):
             )
 
             if group['foreach']:
-                _multi_tensor_adan(**kwargs)
+                if group['fused']:
+                    # Raise runtime Error: foreach cannot be used with fused
+                    raise RuntimeError(
+                        "foreach cannot be used with fused kernel")
+                else:
+                    _multi_tensor_adan(**kwargs)
+            elif group['fused']:
+                _fused_adan(**kwargs)
             else:
                 _single_tensor_adan(**kwargs)
 
@@ -323,3 +333,59 @@ def _multi_tensor_adan(
         torch._foreach_div_(params, 1 + lr * weight_decay)
     torch._foreach_zero_(neg_pre_grads)
     torch._foreach_add_(neg_pre_grads, grads, alpha=-1.0)
+
+def _fused_adan(
+    params: List[Tensor],
+    grads: List[Tensor],
+    exp_avgs: List[Tensor],
+    exp_avg_sqs: List[Tensor],
+    exp_avg_diffs: List[Tensor],
+    neg_pre_grads: List[Tensor],
+    *,
+    beta1: float,
+    beta2: float,
+    beta3: float,
+    bias_correction1: float,
+    bias_correction2: float,
+    bias_correction3_sqrt: float,
+    lr: float,
+    weight_decay: float,
+    eps: float,
+    no_prox: bool,
+    clip_global_grad_norm: Tensor,
+):
+    for i, param in enumerate(params):
+        p_data_fp32 = param.data.float()
+        out_p = param.data
+        grad = grads[i]
+        grad_copy = grad.clone() * clip_global_grad_norm[i]
+        exp_avg = exp_avgs[i]
+        exp_avg_sq = exp_avg_sqs[i]
+        exp_avg_diff = exp_avg_diffs[i]
+        neg_grad = neg_pre_grads[i]
+    with torch.cuda.device(param.device):
+        from torch.utils.cpp_extension import load
+        fused_adan_cuda = load(name="fused_adan_cuda",
+                   sources=["fused_adan/pybind_adan.cpp", "fused_adan/fused_adan_kernel.cu"],
+                   verbose=True)
+        fused_adan_cuda.adan(
+            p_data_fp32,
+            out_p,
+            grad,
+            exp_avg,
+            exp_avg_sq,
+            exp_avg_diff,
+            neg_grad,
+            beta1,
+            beta2,
+            beta3,
+            bias_correction1,
+            bias_correction2,
+            bias_correction3_sqrt,
+            lr,
+            weight_decay,
+            eps,
+            no_prox,
+            clip_global_grad_norm,
+        )
+    neg_grad.zero_().add_(grad_copy, alpha=-1.0)
