@@ -365,6 +365,8 @@ def _fused_adan(
         neg_grad = neg_pre_grads[i]
     with torch.cuda.device(param.device):
         from torch.utils.cpp_extension import load
+        import os
+        print(os.getcwd())
         fused_adan_cuda = load(name="fused_adan_cuda",
                    sources=["pybind_adan.cpp", "fused_adan_kernel.cu"],
                    verbose=True)
