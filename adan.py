@@ -366,7 +366,7 @@ def _fused_adan(
     with torch.cuda.device(param.device):
         from torch.utils.cpp_extension import load
         fused_adan_cuda = load(name="fused_adan_cuda",
-                   sources=["./fused_adan/pybind_adan.cpp", "./fused_adan/fused_adan_kernel.cu"],
+                   sources=["pybind_adan.cpp", "fused_adan_kernel.cu"],
                    verbose=True)
         fused_adan_cuda.adan(
             p_data_fp32,
