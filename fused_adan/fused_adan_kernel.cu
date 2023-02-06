@@ -1,6 +1,7 @@
 /* Copyright 2021 The LightSeq Team
    Copyright NVIDIA/apex
-   This apex_adam_cuda_kernel is adapted from NVIDIA/apex
+   Copyright AlexwellChen
+   This kernel is adapted from NVIDIA/apex and LightSeq Team
 */
 #include <cuda.h>
 #include <cuda_runtime.h>
