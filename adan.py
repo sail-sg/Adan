@@ -364,13 +364,8 @@ def _fused_adan(
         exp_avg_diff = exp_avg_diffs[i]
         neg_grad = neg_pre_grads[i]
     with torch.cuda.device(param.device):
-        from torch.utils.cpp_extension import load
-        import os
-        print(os.getcwd())
-        fused_adan_cuda = load(name="fused_adan_cuda",
-                   sources=["pybind_adan.cpp", "fused_adan_kernel.cu"],
-                   verbose=True)
-        fused_adan_cuda.adan(
+        import fused_adan
+        fused_adan.adan(
             p_data_fp32,
             out_p,
             grad,
