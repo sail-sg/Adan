@@ -358,32 +358,31 @@ def _fused_adan(
         p_data_fp32 = param.data.float()
         out_p = param.data
         grad = grads[i]
-        grad_copy = grad.clone()
+        # grad_copy = grad.clone()
         exp_avg = exp_avgs[i]
         exp_avg_sq = exp_avg_sqs[i]
         exp_avg_diff = exp_avg_diffs[i]
         neg_grad = neg_pre_grads[i]
-    with torch.cuda.device(param.device):
-        import fused_adan
-        fused_adan.adan(
-            p_data_fp32,
-            out_p,
-            grad,
-            exp_avg,
-            exp_avg_sq,
-            exp_avg_diff,
-            neg_grad,
-            beta1,
-            beta2,
-            beta3,
-            bias_correction1,
-            bias_correction2,
-            bias_correction3_sqrt,
-            lr,
-            weight_decay,
-            eps,
-            no_prox,
-            clip_global_grad_norm,
-        )
-    grad_copy.mul_(clip_global_grad_norm)
-    neg_grad.zero_().add_(grad_copy, alpha=-1.0)
+        with torch.cuda.device(param.device):
+            import fused_adan
+            fused_adan.adan(
+                p_data_fp32,
+                out_p,
+                grad,
+                exp_avg,
+                exp_avg_sq,
+                exp_avg_diff,
+                neg_grad,
+                beta1,
+                beta2,
+                beta3,
+                bias_correction1,
+                bias_correction2,
+                bias_correction3_sqrt,
+                lr,
+                weight_decay,
+                eps,
+                no_prox,
+                clip_global_grad_norm,
+            )
+        neg_grad.zero_().add_(grad.mul(clip_global_grad_norm), alpha=-1.0)
