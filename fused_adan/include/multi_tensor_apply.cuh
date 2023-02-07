@@ -14,8 +14,8 @@
 // This header is the one-stop shop for all your multi-tensor apply needs.
 
 // TODO:  Kernel arg size limit may be <4KB for some other cards (ie Jetson)
-constexpr int depth_to_max_tensors[5] = {110, 64, 48, 36, 30};
-constexpr int depth_to_max_blocks[5] = {320, 320, 320, 320, 320};
+constexpr int depth_to_max_tensors[6] = {110, 64, 48, 36, 30, 24};
+constexpr int depth_to_max_blocks[6] = {320, 320, 320, 320, 320, 320};
 
 #ifndef TORCH_CHECK
 #define TORCH_CHECK AT_CHECK
