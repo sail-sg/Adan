@@ -385,4 +385,5 @@ def _fused_adan(
                 no_prox,
                 clip_global_grad_norm,
             )
-        neg_grad.zero_().add_(grad.mul(clip_global_grad_norm), alpha=-1.0)
+        grad.mul_(clip_global_grad_norm)
+        neg_grad.zero_().add_(grad, alpha=-1.0)
