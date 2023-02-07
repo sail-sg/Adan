@@ -12,7 +12,7 @@
 
 // C++ interface
 
-void adan(at::Tensor& p, 
+void adan_single_tensor(at::Tensor& p, 
           at::Tensor& p_copy, 
           at::Tensor& g, 
           at::Tensor& exp_avg, 
@@ -51,7 +51,41 @@ void adan(at::Tensor& p,
                   lr, decay, eps, no_prox, grad_scale);  
 }
 
+void adan_multi_tensor(
+  int chunk_size,
+  at::Tensor noop_flag,
+  std::vector<std::vector<at::Tensor>> tensor_lists,
+  const float beta1,
+  const float beta2,
+  const float beta3,
+  const float bias_correction1,
+  const float bias_correction2,
+  const float bias_correction3_sqrt,
+  const float lr,
+  const float decay,
+  const float epsilon,
+  const bool no_prox,
+  const float clip_global_grad_norm){
+    multi_tensor_adan_cuda(
+      chunk_size,
+      noop_flag,
+      tensor_lists,
+      beta1,
+      beta2,
+      beta3,
+      bias_correction1,
+      bias_correction2,
+      bias_correction3_sqrt,
+      lr,
+      decay,
+      epsilon,
+      no_prox,
+      clip_global_grad_norm
+    )
+  }
+
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-  m.def("adan", &adan, "Adan optimized CUDA implementation.");
+  m.def("adan_single_tensor", &adan_single_tensor, "Adan optimized CUDA single tensor implementation.");
+  m.def("adan_multi_tensor", &adan_multi_tensor, "Adan optimized CUDA multi tensor implementation.");
 }

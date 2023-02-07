@@ -19,7 +19,7 @@ import torch
 from torch import Tensor
 from torch.optim.optimizer import Optimizer
 
-from torch.utils.cpp_extension import load
+from apex.multi_tensor_apply import multi_tensor_applier
 
 class Adan(Optimizer):
     """
@@ -196,12 +196,13 @@ class Adan(Optimizer):
             if group['foreach']:
                 if group['fused']:
                     # Raise runtime Error: foreach cannot be used with fused
-                    raise RuntimeError(
-                        "foreach cannot be used with fused kernel")
+                    # raise RuntimeError(
+                    #     "foreach cannot be used with fused kernel")
+                    _fused_adan_multi_tensor(**kwargs)
                 else:
                     _multi_tensor_adan(**kwargs)
             elif group['fused']:
-                _fused_adan(**kwargs)
+                _fused_adan_single_tensor(**kwargs)
             else:
                 _single_tensor_adan(**kwargs)
 
@@ -334,7 +335,49 @@ def _multi_tensor_adan(
     torch._foreach_zero_(neg_pre_grads)
     torch._foreach_add_(neg_pre_grads, grads, alpha=-1.0)
 
-def _fused_adan(
+def _fused_adan_multi_tensor(
+    params: List[Tensor],
+    grads: List[Tensor],
+    exp_avgs: List[Tensor],
+    exp_avg_sqs: List[Tensor],
+    exp_avg_diffs: List[Tensor],
+    neg_pre_grads: List[Tensor],
+    *,
+    beta1: float,
+    beta2: float,
+    beta3: float,
+    bias_correction1: float,
+    bias_correction2: float,
+    bias_correction3_sqrt: float,
+    lr: float,
+    weight_decay: float,
+    eps: float,
+    no_prox: bool,
+    clip_global_grad_norm: Tensor,
+):
+    import fused_adan
+    _dummy_overflow_buf = torch.cuda.IntTensor([0])
+    multi_tensor_applier(
+        fused_adan.adan_multi_tensor,
+        _dummy_overflow_buf,
+        [params, grads, exp_avgs, exp_avg_sqs, exp_avg_diffs, neg_pre_grads],
+        beta1,
+        beta2,
+        beta3,
+        bias_correction1,
+        bias_correction2,
+        bias_correction3_sqrt,
+        lr,
+        weight_decay,
+        eps,
+        no_prox,
+        clip_global_grad_norm
+    )
+    torch._foreach_zero_(neg_pre_grads)
+    torch._foreach_add_(neg_pre_grads, grads, alpha=-1.0)
+
+
+def _fused_adan_single_tensor(
     params: List[Tensor],
     grads: List[Tensor],
     exp_avgs: List[Tensor],

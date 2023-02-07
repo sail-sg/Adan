@@ -15,6 +15,7 @@
 #include <ATen/cuda/CUDAContext.h>
 #include <ATen/cuda/detail/IndexUtils.cuh>
 #include <ATen/cuda/Exceptions.h>
+#include "type_shim.h"
 #include "fused_adan_kernel.cuh"
 
 

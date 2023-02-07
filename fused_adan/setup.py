@@ -8,7 +8,7 @@ setup(
     ext_modules=[
         CUDAExtension(
             'fused_adan', 
-            sources=['pybind_adan.cpp','fused_adan_kernel.cu']
+            sources=['pybind_adan.cpp','fused_adan_kernel.cu', 'multi_tensor_adan_kernel.cu']
         #,extra_compile_args={'nvcc': nvcc_args}
         )
     ],
