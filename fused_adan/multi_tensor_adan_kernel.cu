@@ -7,9 +7,9 @@
 
 #include <assert.h>
 
-#include "type_shim.h" // Used for DISPATCH
-#include "multi_tensor_apply.cuh" 
-#include "fused_adan_kernel.cuh"
+#include "include/type_shim.h" // Used for DISPATCH
+#include "include/multi_tensor_apply.cuh" 
+#include "include/fused_adan_kernel.cuh"
 
 #define BLOCK_SIZE 512
 #define ILP 4

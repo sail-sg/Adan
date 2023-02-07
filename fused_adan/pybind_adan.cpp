@@ -1,6 +1,6 @@
 #include <torch/extension.h>
 
-#include "fused_adan_kernel.cuh"
+#include "include/fused_adan_kernel.cuh"
 
 // x is torch::Tensor
 #define CHECK_CUDA(x) AT_ASSERTM(x.is_cuda(), #x " must be a CUDA tensor")
@@ -81,7 +81,7 @@ void adan_multi_tensor(
       epsilon,
       no_prox,
       clip_global_grad_norm
-    )
+    );
   }
 
 
