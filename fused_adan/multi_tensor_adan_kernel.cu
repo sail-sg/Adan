@@ -106,7 +106,7 @@ struct AdanFunctor
         r_g[ii] *= clip_global_grad_norm; //scaled_grad
         MATH_T diff, update;
         diff = r_g[ii] + r_neg_grad[ii];
-        update = r_g[ii] + beta2 * diff
+        update = r_g[ii] + beta2 * diff;
 
         r_exp_avg[ii] = beta1 * r_exp_avg[ii] + (1 - beta1) * r_g[ii];
         r_exp_avg_diff[ii] = beta2 * r_exp_avg_diff[ii] + (1 - beta2) * diff;

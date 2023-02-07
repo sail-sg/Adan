@@ -19,8 +19,6 @@ import torch
 from torch import Tensor
 from torch.optim.optimizer import Optimizer
 
-from apex.multi_tensor_apply import multi_tensor_applier
-
 class Adan(Optimizer):
     """
     Implements a pytorch variant of Adan
@@ -356,6 +354,7 @@ def _fused_adan_multi_tensor(
     clip_global_grad_norm: Tensor,
 ):
     import fused_adan
+    from fused_adan.multi_tensor_apply import multi_tensor_applier
     _dummy_overflow_buf = torch.cuda.IntTensor([0])
     multi_tensor_applier(
         fused_adan.adan_multi_tensor,
