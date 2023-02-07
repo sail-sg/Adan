@@ -48,7 +48,6 @@ class MultiTensorApply(object):
                   *args)
 
 
-
 class Adan(Optimizer):
     """
     Implements a pytorch variant of Adan
@@ -223,9 +222,6 @@ class Adan(Optimizer):
 
             if group['foreach']:
                 if group['fused']:
-                    # Raise runtime Error: foreach cannot be used with fused
-                    # raise RuntimeError(
-                    #     "foreach cannot be used with fused kernel")
                     _fused_adan_multi_tensor(**kwargs)
                 else:
                     _multi_tensor_adan(**kwargs)

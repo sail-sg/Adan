@@ -1,3 +1,7 @@
+/* Copyright NVIDIA/apex
+   Copyright AlexwellChen
+   This kernel is adapted from NVIDIA/apex.
+*/
 #include <ATen/ATen.h>
 #include <ATen/AccumulateType.h>
 #include <ATen/cuda/CUDAContext.h>
