@@ -19,6 +19,37 @@ import torch
 from torch import Tensor
 from torch.optim.optimizer import Optimizer
 
+class MultiTensorApply(object):
+    available = False
+    warned = False
+
+    def __init__(self, chunk_size):
+        try:
+            import amp_C
+            MultiTensorApply.available = True
+            self.chunk_size = chunk_size
+        except ImportError as err:
+            MultiTensorApply.available = False
+            MultiTensorApply.import_err = err
+
+    def check_avail(self):
+        if MultiTensorApply.available == False:
+            raise RuntimeError(
+                "Attempted to call MultiTensorApply method, but MultiTensorApply "
+                "is not available, possibly because Apex was installed without "
+                "--cpp_ext --cuda_ext.  Original import error message:",
+                MultiTensorApply.import_err)
+
+    def __call__(self, op, noop_flag_buffer, tensor_lists, *args):
+        self.check_avail()
+
+        return op(self.chunk_size,
+                  noop_flag_buffer,
+                  tensor_lists,
+                  *args)
+
+
+
 class Adan(Optimizer):
     """
     Implements a pytorch variant of Adan
@@ -354,7 +385,7 @@ def _fused_adan_multi_tensor(
     clip_global_grad_norm: Tensor,
 ):
     import fused_adan
-    from multi_tensor_apply import multi_tensor_applier
+    multi_tensor_applier = MultiTensorApply(2048*32)
     _dummy_overflow_buf = torch.cuda.IntTensor([0])
     multi_tensor_applier(
         fused_adan.adan_multi_tensor,
