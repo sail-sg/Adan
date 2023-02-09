@@ -96,10 +96,10 @@ __global__ void adan_cuda_kernel<float, float>(
         float scaled_grad3 = g4.z * clip_global_grad_norm;
         float scaled_grad4 = g4.w * clip_global_grad_norm;
 
-        neg_grad4_diff.x = scaled_grad1 + neg_grad4_diff.x;
-        neg_grad4_diff.y = scaled_grad2 + neg_grad4_diff.y;
-        neg_grad4_diff.z = scaled_grad3 + neg_grad4_diff.z;
-        neg_grad4_diff.w = scaled_grad4 + neg_grad4_diff.w;
+        neg_grad4_diff[0] = scaled_grad1 + neg_grad4_diff.x;
+        neg_grad4_diff[1] = scaled_grad2 + neg_grad4_diff.y;
+        neg_grad4_diff[2] = scaled_grad3 + neg_grad4_diff.z;
+        neg_grad4_diff[3] = scaled_grad4 + neg_grad4_diff.w;
 
         float update1 = scaled_grad1 + b2 * neg_grad4_diff.x;
         float update2 = scaled_grad2 + b2 * neg_grad4_diff.y;
