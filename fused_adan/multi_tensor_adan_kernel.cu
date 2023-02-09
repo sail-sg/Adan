@@ -82,7 +82,7 @@ struct AdanFunctor
       MATH_T r_exp_avg[ILP];
       MATH_T r_exp_avg_sq[ILP];
       MATH_T r_exp_avg_diff[ILP];
-      MATH_T r_neg_grad[ILP];
+      MATH_T r_neg_grad_diff[ILP];
 #pragma unroll
       for(int ii = 0; ii < ILP; ii++)
       {
@@ -94,26 +94,26 @@ struct AdanFunctor
           r_exp_avg[ii] = exp_avg[i];
           r_exp_avg_sq[ii] = exp_avg_sq[i];
           r_exp_avg_diff[ii] = exp_avg_diff[i];
-          r_neg_grad[ii] = neg_grad[i];
+          r_neg_grad_diff[ii] = neg_grad[i];
         } else {
           r_p[ii] = MATH_T(0);
           r_g[ii] = MATH_T(0);
           r_exp_avg[ii] = MATH_T(0);
           r_exp_avg_sq[ii] = MATH_T(0);
           r_exp_avg_diff[ii] = MATH_T(0);
-          r_neg_grad[ii] = MATH_T(0);
+          r_neg_grad_diff[ii] = MATH_T(0);
         }
       }
 #pragma unroll
       for(int ii = 0; ii < ILP; ii++)
       {
         r_g[ii] *= clip_global_grad_norm; //scaled_grad
-        MATH_T diff, update;
-        diff = r_g[ii] + r_neg_grad[ii];
-        update = r_g[ii] + beta2 * diff;
+        MATH_T update;
+        r_neg_grad_diff = r_g[ii] + r_neg_grad[ii];
+        update = r_g[ii] + beta2 * r_neg_grad_diff;
 
         r_exp_avg[ii] = beta1 * r_exp_avg[ii] + (1 - beta1) * r_g[ii];
-        r_exp_avg_diff[ii] = beta2 * r_exp_avg_diff[ii] + (1 - beta2) * diff;
+        r_exp_avg_diff[ii] = beta2 * r_exp_avg_diff[ii] + (1 - beta2) * r_neg_grad_diff;
         r_exp_avg_sq[ii] = beta3 * r_exp_avg_sq[ii] + (1 - beta3) * update * update;
 
         MATH_T denom;

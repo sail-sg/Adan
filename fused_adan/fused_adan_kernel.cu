@@ -74,14 +74,14 @@ __global__ void adan_cuda_kernel<float, float>(
 
         float4* p4_ptr = reinterpret_cast<float4*>(p);
         const float4* g4_ptr = reinterpret_cast<const float4*>(g);
-        const float4* neg_grad4_ptr = reinterpret_cast<const float4*>(neg_grad);
+        const float4* neg_grad4_diff_ptr = reinterpret_cast<const float4*>(neg_grad);
         float4* exp_avg4_ptr = reinterpret_cast<float4*>(exp_avg);
         float4* exp_avg_sq4_ptr = reinterpret_cast<float4*>(exp_avg_sq);
         float4* exp_avg_diff4_ptr = reinterpret_cast<float4*>(exp_avg_diff);
         
         float4 p4 = p4_ptr[global_id];
         const float4 g4 = g4_ptr[global_id];
-        const float4 neg_grad4 = neg_grad4_ptr[global_id];
+        const float4 neg_grad4_diff = neg_grad4_diff_ptr[global_id];
         float4 exp_avg4 = exp_avg4_ptr[global_id];
         float4 exp_avg_sq4 = exp_avg_sq4_ptr[global_id];
         float4 exp_avg_diff4 = exp_avg_diff4_ptr[global_id];
@@ -96,15 +96,15 @@ __global__ void adan_cuda_kernel<float, float>(
         float scaled_grad3 = g4.z * clip_global_grad_norm;
         float scaled_grad4 = g4.w * clip_global_grad_norm;
 
-        float diff1 = scaled_grad1 + neg_grad4.x;
-        float diff2 = scaled_grad2 + neg_grad4.y;
-        float diff3 = scaled_grad3 + neg_grad4.z;
-        float diff4 = scaled_grad4 + neg_grad4.w;
+        neg_grad4_diff.x = scaled_grad1 + neg_grad4_diff.x;
+        neg_grad4_diff.y = scaled_grad2 + neg_grad4_diff.y;
+        neg_grad4_diff.z = scaled_grad3 + neg_grad4_diff.z;
+        neg_grad4_diff.w = scaled_grad4 + neg_grad4_diff.w;
 
-        float update1 = scaled_grad1 + b2 * diff1;
-        float update2 = scaled_grad2 + b2 * diff2;
-        float update3 = scaled_grad3 + b2 * diff3;
-        float update4 = scaled_grad4 + b2 * diff4;
+        float update1 = scaled_grad1 + b2 * neg_grad4_diff.x;
+        float update2 = scaled_grad2 + b2 * neg_grad4_diff.y;
+        float update3 = scaled_grad3 + b2 * neg_grad4_diff.z;
+        float update4 = scaled_grad4 + b2 * neg_grad4_diff.w;
 
         new_exp_avg4.x = b1 * exp_avg4.x + (1 - b1) * scaled_grad1;
         new_exp_avg4.y = b1 * exp_avg4.y + (1 - b1) * scaled_grad2;
@@ -116,10 +116,10 @@ __global__ void adan_cuda_kernel<float, float>(
         new_exp_avg_sq4.z = b3 * exp_avg_sq4.z + (1 - b3) * update3 * update3;
         new_exp_avg_sq4.w = b3 * exp_avg_sq4.w + (1 - b3) * update4 * update4;
 
-        new_exp_avg_diff4.x = b2 * exp_avg_diff4.x + (1 - b2) * diff1;
-        new_exp_avg_diff4.y = b2 * exp_avg_diff4.y + (1 - b2) * diff2;
-        new_exp_avg_diff4.z = b2 * exp_avg_diff4.z + (1 - b2) * diff3;
-        new_exp_avg_diff4.w = b2 * exp_avg_diff4.w + (1 - b2) * diff4;
+        new_exp_avg_diff4.x = b2 * exp_avg_diff4.x + (1 - b2) * neg_grad4_diff.x;
+        new_exp_avg_diff4.y = b2 * exp_avg_diff4.y + (1 - b2) * neg_grad4_diff.y;
+        new_exp_avg_diff4.z = b2 * exp_avg_diff4.z + (1 - b2) * neg_grad4_diff.z;
+        new_exp_avg_diff4.w = b2 * exp_avg_diff4.w + (1 - b2) * neg_grad4_diff.w;
 
         float4 denom4;
         denom4.x = sqrt(new_exp_avg_sq4.x - new_exp_avg_diff4.x * new_exp_avg_diff4.x / b2) + eps;
