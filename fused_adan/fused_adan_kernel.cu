@@ -46,14 +46,19 @@ __global__ void adan_cuda_kernel(
 
     exp_avg_sq[global_id] = b3 * exp_avg_sq[global_id] + (1 - b3) * update * update;
 
-    float denom;
+    float denom, step_size_diff, step_size;
     denom = sqrtf(exp_avg_sq[global_id]) / bias_correction3_sqrt + eps;
-    update = (exp_avg[global_id] / bias_correction1 + b2 * exp_avg_diff[global_id] / bias_correction2) / denom;
-    
+    step_size_diff = lr * b2 / bias_correction2;
+    step_size = lr / bias_correction1;
+
     if (no_prox){
-        p[global_id] = p[global_id] * (1 - lr * decay) + update * (-lr);
+        p[global_id] = p[global_id] * (1 - lr * decay)
+            - step_size * exp_avg[global_id] / denom
+            - step_size_diff * exp_avg_diff[global_id] / denom;
     }else{
-        p[global_id] = p[global_id] + update * (-lr) / (1 + lr * decay);
+        p[global_id] = p[global_id] - step_size * exp_avg[global_id] / denom
+            - step_size_diff * exp_avg_diff[global_id] / denom;
+        p[global_id] = p[global_id] / (1 + lr * decay);
     } 
     if (p_copy != NULL) p_copy[global_id] = (GRAD_T)p[global_id];
 }
@@ -126,25 +131,27 @@ __global__ void adan_cuda_kernel<float, float>(
         denom4.y = sqrt(new_exp_avg_sq4.y - new_exp_avg_diff4.y * new_exp_avg_diff4.y / b2) + eps;
         denom4.z = sqrt(new_exp_avg_sq4.z - new_exp_avg_diff4.z * new_exp_avg_diff4.z / b2) + eps;
         denom4.w = sqrt(new_exp_avg_sq4.w - new_exp_avg_diff4.w * new_exp_avg_diff4.w / b2) + eps;
-
-        // update = (exp_avg[global_id] / bias_correction1 + b2 * exp_avg_diff[global_id] / bias_correction2) / denom;
-        update1 = (new_exp_avg4.x / bias_correction1 + b2 * new_exp_avg_diff4.x / bias_correction2) / denom4.x;
-        update2 = (new_exp_avg4.y / bias_correction1 + b2 * new_exp_avg_diff4.y / bias_correction2) / denom4.y;
-        update3 = (new_exp_avg4.z / bias_correction1 + b2 * new_exp_avg_diff4.z / bias_correction2) / denom4.z;
-        update4 = (new_exp_avg4.w / bias_correction1 + b2 * new_exp_avg_diff4.w / bias_correction2) / denom4.w;
+        
+        float step_size_diff, step_size;
+        step_size_diff = lr * b2 / bias_correction2
+        step_size = lr / bias_correction1;
 
         if (no_prox){
-            // p[global_id] = p[global_id] * (1 - lr * decay) + update * (-lr);
-            new_p4.x = p4.x * (1 - lr * decay) + update1 * (-lr);
-            new_p4.y = p4.y * (1 - lr * decay) + update2 * (-lr);
-            new_p4.z = p4.z * (1 - lr * decay) + update3 * (-lr);
-            new_p4.w = p4.w * (1 - lr * decay) + update4 * (-lr);
+            // p[global_id] = p[global_id] * (1 - lr * decay) 
+            // p[global_id] = p[global_id] - step_size * exp_avg[global_id] / denom
+            // p[global_id] = p[global_id] - step_size_diff * exp_avg_diff[global_id] / denom
+            new_p4.x = p4.x * (1 - lr * decay) - step_size * new_exp_avg4.x / denom4.x - step_size_diff * new_exp_avg_diff4.x / denom4.x;
+            new_p4.y = p4.y * (1 - lr * decay) - step_size * new_exp_avg4.y / denom4.y - step_size_diff * new_exp_avg_diff4.y / denom4.y;
+            new_p4.z = p4.z * (1 - lr * decay) - step_size * new_exp_avg4.z / denom4.z - step_size_diff * new_exp_avg_diff4.z / denom4.z;
+            new_p4.w = p4.w * (1 - lr * decay) - step_size * new_exp_avg4.w / denom4.w - step_size_diff * new_exp_avg_diff4.w / denom4.w;
         }else{
-            // p[global_id] = p[global_id] + update * (-lr) / (1 + lr * decay);
-            new_p4.x = p4.x + update1 * (-lr) / (1 + lr * decay);
-            new_p4.y = p4.y + update2 * (-lr) / (1 + lr * decay);
-            new_p4.z = p4.z + update3 * (-lr) / (1 + lr * decay);
-            new_p4.w = p4.w + update4 * (-lr) / (1 + lr * decay);
+            // p[global_id] = p[global_id] - step_size * exp_avg[global_id] / denom
+            // p[global_id] = p[global_id] - step_size_diff * exp_avg_diff[global_id] / denom;
+            // p[global_id] = p[global_id] / (1 + lr * decay);
+            new_p4.x = (p4.x - step_size * new_exp_avg4.x / denom4.x - step_size_diff * new_exp_avg_diff4.x / denom4.x) / (1 + lr * decay);
+            new_p4.y = (p4.y - step_size * new_exp_avg4.y / denom4.y - step_size_diff * new_exp_avg_diff4.y / denom4.y) / (1 + lr * decay);
+            new_p4.z = (p4.z - step_size * new_exp_avg4.z / denom4.z - step_size_diff * new_exp_avg_diff4.z / denom4.z) / (1 + lr * decay);
+            new_p4.w = (p4.w - step_size * new_exp_avg4.w / denom4.w - step_size_diff * new_exp_avg_diff4.w / denom4.w) / (1 + lr * decay);
         }   
 
         p4_ptr[global_id] = new_p4;

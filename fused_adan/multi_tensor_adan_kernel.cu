@@ -114,16 +114,22 @@ struct AdanFunctor
 
         r_exp_avg[ii] = beta1 * r_exp_avg[ii] + (1 - beta1) * r_g[ii];
         r_exp_avg_diff[ii] = beta2 * r_exp_avg_diff[ii] + (1 - beta2) * r_neg_grad_diff[ii];
+        
         r_exp_avg_sq[ii] = beta3 * r_exp_avg_sq[ii] + (1 - beta3) * update * update;
 
         MATH_T denom;
         denom = sqrtf(r_exp_avg_sq[ii]) / bias_correction3_sqrt + epsilon;
-        update = (r_exp_avg[ii] / bias_correction1 + beta2 * r_exp_avg_diff[ii] / bias_correction2) / denom;
-        
+        MATH_T step_size_diff = lr * beta2 / bias_correction2;
+        MATH_T step_size = lr / bias_correction1;
+
         if(no_prox){
-          r_p[ii] = r_p[ii] * (1 - lr * decay) + update * (-lr);
+          r_p[ii] = r_p[ii] * (1 - lr * decay);
+          r_p[ii] = r_p[ii] - step_size * r_exp_avg[ii] / denom;
+          r_p[ii] = r_p[ii] - step_size_diff * r_exp_avg_diff[ii] / denom;
         } else {
-          r_p[ii] = r_p[ii] + update * (-lr) / (1 + lr * decay);
+          r_p[ii] = r_p[ii] - step_size * r_exp_avg[ii] / denom;
+          r_p[ii] = r_p[ii] - step_size_diff * r_exp_avg_diff[ii] / denom;
+          r_p[ii] = r_p[ii] / (1 + lr * decay);
         }
       }
 #pragma unroll
