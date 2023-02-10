@@ -133,7 +133,7 @@ __global__ void adan_cuda_kernel<float, float>(
         denom4.w = sqrt(new_exp_avg_sq4.w - new_exp_avg_diff4.w * new_exp_avg_diff4.w / b2) + eps;
         
         float step_size_diff, step_size;
-        step_size_diff = lr * b2 / bias_correction2
+        step_size_diff = lr * b2 / bias_correction2;
         step_size = lr / bias_correction1;
 
         if (no_prox){
