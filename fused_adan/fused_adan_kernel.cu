@@ -85,7 +85,7 @@ __global__ void adan_cuda_kernel<float, float>(
         float4* exp_avg_diff4_ptr = reinterpret_cast<float4*>(exp_avg_diff);
         
         float4 p4 = p4_ptr[global_id];
-        const float4 g4 = g4_ptr[global_id];
+        float4 g4 = g4_ptr[global_id];
         const float4 neg_grad4 = neg_grad4_ptr[global_id];
         float4 exp_avg4 = exp_avg4_ptr[global_id];
         float4 exp_avg_sq4 = exp_avg_sq4_ptr[global_id];
@@ -96,41 +96,51 @@ __global__ void adan_cuda_kernel<float, float>(
         float4 new_exp_avg_sq4;
         float4 new_exp_avg_diff4;
 
-        float scaled_grad1 = g4.x * clip_global_grad_norm;
-        float scaled_grad2 = g4.y * clip_global_grad_norm;
-        float scaled_grad3 = g4.z * clip_global_grad_norm;
-        float scaled_grad4 = g4.w * clip_global_grad_norm;
+        // float scaled_grad1 = g4.x * clip_global_grad_norm;
+        // float scaled_grad2 = g4.y * clip_global_grad_norm;
+        // float scaled_grad3 = g4.z * clip_global_grad_norm;
+        // float scaled_grad4 = g4.w * clip_global_grad_norm;
 
-        float diff1 = scaled_grad1 + neg_grad4.x;
-        float diff2 = scaled_grad2 + neg_grad4.y;
-        float diff3 = scaled_grad3 + neg_grad4.z;
-        float diff4 = scaled_grad4 + neg_grad4.w;
+        g4 *= clip_global_grad_norm;
+        float4 diff = g4 + neg_grad4;
+        float4 update = g4 + b2 * diff;
 
-        float update1 = scaled_grad1 + b2 * diff1;
-        float update2 = scaled_grad2 + b2 * diff2;
-        float update3 = scaled_grad3 + b2 * diff3;
-        float update4 = scaled_grad4 + b2 * diff4;
+        // float diff1 = g4.x + neg_grad4.x;
+        // float diff2 = g4.y + neg_grad4.y;
+        // float diff3 = g4.z + neg_grad4.z;
+        // float diff4 = g4.w + neg_grad4.w;
 
-        new_exp_avg4.x = b1 * exp_avg4.x + (1 - b1) * scaled_grad1;
-        new_exp_avg4.y = b1 * exp_avg4.y + (1 - b1) * scaled_grad2;
-        new_exp_avg4.z = b1 * exp_avg4.z + (1 - b1) * scaled_grad3;
-        new_exp_avg4.w = b1 * exp_avg4.w + (1 - b1) * scaled_grad4;
+        // float update1 = g4.x + b2 * diff1;
+        // float update2 = g4.y + b2 * diff2;
+        // float update3 = g4.z + b2 * diff3;
+        // float update4 = g4.w + b2 * diff4;
 
-        new_exp_avg_sq4.x = b3 * exp_avg_sq4.x + (1 - b3) * update1 * update1;
-        new_exp_avg_sq4.y = b3 * exp_avg_sq4.y + (1 - b3) * update2 * update2;
-        new_exp_avg_sq4.z = b3 * exp_avg_sq4.z + (1 - b3) * update3 * update3;
-        new_exp_avg_sq4.w = b3 * exp_avg_sq4.w + (1 - b3) * update4 * update4;
+        // new_exp_avg4.x = b1 * exp_avg4.x + (1 - b1) * g4.x;
+        // new_exp_avg4.y = b1 * exp_avg4.y + (1 - b1) * g4.y;
+        // new_exp_avg4.z = b1 * exp_avg4.z + (1 - b1) * g4.z;
+        // new_exp_avg4.w = b1 * exp_avg4.w + (1 - b1) * g4.w;
 
-        new_exp_avg_diff4.x = b2 * exp_avg_diff4.x + (1 - b2) * diff1;
-        new_exp_avg_diff4.y = b2 * exp_avg_diff4.y + (1 - b2) * diff2;
-        new_exp_avg_diff4.z = b2 * exp_avg_diff4.z + (1 - b2) * diff3;
-        new_exp_avg_diff4.w = b2 * exp_avg_diff4.w + (1 - b2) * diff4;
+        new_exp_avg4 = b1 * exp_avg4 + (1 - b1) * g4;
 
-        float4 denom4;
-        denom4.x = sqrt(new_exp_avg_sq4.x - new_exp_avg_diff4.x * new_exp_avg_diff4.x / b2) + eps;
-        denom4.y = sqrt(new_exp_avg_sq4.y - new_exp_avg_diff4.y * new_exp_avg_diff4.y / b2) + eps;
-        denom4.z = sqrt(new_exp_avg_sq4.z - new_exp_avg_diff4.z * new_exp_avg_diff4.z / b2) + eps;
-        denom4.w = sqrt(new_exp_avg_sq4.w - new_exp_avg_diff4.w * new_exp_avg_diff4.w / b2) + eps;
+        // new_exp_avg_sq4.x = b3 * exp_avg_sq4.x + (1 - b3) * update1 * update1;
+        // new_exp_avg_sq4.y = b3 * exp_avg_sq4.y + (1 - b3) * update2 * update2;
+        // new_exp_avg_sq4.z = b3 * exp_avg_sq4.z + (1 - b3) * update3 * update3;
+        // new_exp_avg_sq4.w = b3 * exp_avg_sq4.w + (1 - b3) * update4 * update4;
+
+        new_exp_avg_sq4 = b3 * exp_avg_sq4 + (1 - b3) * update * update;
+
+        // new_exp_avg_diff4.x = b2 * exp_avg_diff4.x + (1 - b2) * diff1;
+        // new_exp_avg_diff4.y = b2 * exp_avg_diff4.y + (1 - b2) * diff2;
+        // new_exp_avg_diff4.z = b2 * exp_avg_diff4.z + (1 - b2) * diff3;
+        // new_exp_avg_diff4.w = b2 * exp_avg_diff4.w + (1 - b2) * diff4;
+
+        new_exp_avg_diff4 = b2 * exp_avg_diff4 + (1 - b2) * diff;
+
+        float4 denom4 = sqrt(new_exp_avg_sq4 - new_exp_avg_diff4 * new_exp_avg_diff4 / b2) + eps;
+        // denom4.x = sqrt(new_exp_avg_sq4.x - new_exp_avg_diff4.x * new_exp_avg_diff4.x / b2) + eps;
+        // denom4.y = sqrt(new_exp_avg_sq4.y - new_exp_avg_diff4.y * new_exp_avg_diff4.y / b2) + eps;
+        // denom4.z = sqrt(new_exp_avg_sq4.z - new_exp_avg_diff4.z * new_exp_avg_diff4.z / b2) + eps;
+        // denom4.w = sqrt(new_exp_avg_sq4.w - new_exp_avg_diff4.w * new_exp_avg_diff4.w / b2) + eps;
         
         float step_size_diff, step_size;
         step_size_diff = lr * b2 / bias_correction2;
@@ -140,20 +150,22 @@ __global__ void adan_cuda_kernel<float, float>(
             // p[global_id] = p[global_id] * (1 - lr * decay) 
             // p[global_id] = p[global_id] - step_size * exp_avg[global_id] / denom
             // p[global_id] = p[global_id] - step_size_diff * exp_avg_diff[global_id] / denom
-            new_p4.x = p4.x * (1 - lr * decay) - step_size * new_exp_avg4.x / denom4.x - step_size_diff * new_exp_avg_diff4.x / denom4.x;
-            new_p4.y = p4.y * (1 - lr * decay) - step_size * new_exp_avg4.y / denom4.y - step_size_diff * new_exp_avg_diff4.y / denom4.y;
-            new_p4.z = p4.z * (1 - lr * decay) - step_size * new_exp_avg4.z / denom4.z - step_size_diff * new_exp_avg_diff4.z / denom4.z;
-            new_p4.w = p4.w * (1 - lr * decay) - step_size * new_exp_avg4.w / denom4.w - step_size_diff * new_exp_avg_diff4.w / denom4.w;
+            // new_p4.x = p4.x * (1 - lr * decay) - step_size * new_exp_avg4.x / denom4.x - step_size_diff * new_exp_avg_diff4.x / denom4.x;
+            // new_p4.y = p4.y * (1 - lr * decay) - step_size * new_exp_avg4.y / denom4.y - step_size_diff * new_exp_avg_diff4.y / denom4.y;
+            // new_p4.z = p4.z * (1 - lr * decay) - step_size * new_exp_avg4.z / denom4.z - step_size_diff * new_exp_avg_diff4.z / denom4.z;
+            // new_p4.w = p4.w * (1 - lr * decay) - step_size * new_exp_avg4.w / denom4.w - step_size_diff * new_exp_avg_diff4.w / denom4.w;
+            new_p4 = p4 * (1 - lr * decay) - step_size * new_exp_avg4 / denom4 - step_size_diff * new_exp_avg_diff4 / denom4;
         }else{
             // p[global_id] = p[global_id] - step_size * exp_avg[global_id] / denom
             // p[global_id] = p[global_id] - step_size_diff * exp_avg_diff[global_id] / denom;
             // p[global_id] = p[global_id] / (1 + lr * decay);
-            new_p4.x = (p4.x - step_size * new_exp_avg4.x / denom4.x - step_size_diff * new_exp_avg_diff4.x / denom4.x) / (1 + lr * decay);
-            new_p4.y = (p4.y - step_size * new_exp_avg4.y / denom4.y - step_size_diff * new_exp_avg_diff4.y / denom4.y) / (1 + lr * decay);
-            new_p4.z = (p4.z - step_size * new_exp_avg4.z / denom4.z - step_size_diff * new_exp_avg_diff4.z / denom4.z) / (1 + lr * decay);
-            new_p4.w = (p4.w - step_size * new_exp_avg4.w / denom4.w - step_size_diff * new_exp_avg_diff4.w / denom4.w) / (1 + lr * decay);
+            // new_p4.x = (p4.x - step_size * new_exp_avg4.x / denom4.x - step_size_diff * new_exp_avg_diff4.x / denom4.x) / (1 + lr * decay);
+            // new_p4.y = (p4.y - step_size * new_exp_avg4.y / denom4.y - step_size_diff * new_exp_avg_diff4.y / denom4.y) / (1 + lr * decay);
+            // new_p4.z = (p4.z - step_size * new_exp_avg4.z / denom4.z - step_size_diff * new_exp_avg_diff4.z / denom4.z) / (1 + lr * decay);
+            // new_p4.w = (p4.w - step_size * new_exp_avg4.w / denom4.w - step_size_diff * new_exp_avg_diff4.w / denom4.w) / (1 + lr * decay);
+            new_p4 = (p4 - step_size * new_exp_avg4 / denom4 - step_size_diff * new_exp_avg_diff4 / denom4) / (1 + lr * decay);
         }   
-
+        g4_ptr[global_id] = g4;
         p4_ptr[global_id] = new_p4;
         exp_avg4_ptr[global_id] = new_exp_avg4;
         exp_avg_sq4_ptr[global_id] = new_exp_avg_sq4;
