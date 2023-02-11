@@ -138,6 +138,7 @@ struct AdanFunctor
         int i = i_start + threadIdx.x + ii*blockDim.x;
         if(i < n && i < chunk_size)
         {
+          g[i] = r_g[ii];
           p[i] = r_p[ii];
           exp_avg[i] = r_exp_avg[ii];
           exp_avg_sq[i] = r_exp_avg_sq[ii];
