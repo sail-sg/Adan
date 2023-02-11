@@ -453,5 +453,5 @@ def _fused_adan_single_tensor(
                 no_prox,
                 clip_global_grad_norm,
             )
-        grad.mul_(clip_global_grad_norm)
+        # grad.mul_(clip_global_grad_norm)
         neg_grad.zero_().add_(grad, alpha=-1.0)
