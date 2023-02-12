@@ -2,16 +2,7 @@ from setuptools import setup
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 import platform
 import ctypes.util
-
-def has_cuda():
-    # Check if the system has a CUDA-capable GPU
-    has_gpu = any(['nvidia' in x.lower() for x in platform.uname()._field_defaults['node']])
-
-    # Check if CUDA library is installed
-    cuda_library = ctypes.util.find_library('cuda')
-    has_cuda_library = cuda_library is not None
-
-    return has_gpu and has_cuda_library
+from torch.cuda import is_available
 
 cuda_extension = CUDAExtension(
             'fused_adan', 
@@ -32,6 +23,6 @@ setup(
         'Xie, Xingyu and Zhou, Pan and Li, Huan and '
         'Lin, Zhouchen and Yan, Shuicheng'
     ),
-    ext_modules=[cuda_extension] if has_cuda() else [],
+    ext_modules=[cuda_extension] if is_available() else [],
     cmdclass={'build_ext': BuildExtension} if has_cuda() else {},
 )
