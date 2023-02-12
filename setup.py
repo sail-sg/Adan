@@ -14,8 +14,4 @@ setup(
         'Xie, Xingyu and Zhou, Pan and Li, Huan and '
         'Lin, Zhouchen and Yan, Shuicheng'
     ),
-    package_data={
-        'fused_adan': ['include/*.cuh', 'include/*.h', '*.cu', '*.cpp'],
-    },
-    include_package_data=True,
 )
