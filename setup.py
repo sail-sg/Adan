@@ -16,5 +16,6 @@ setup(
     ),
     package_data={
         'fused_adan': ['include/*.cuh', 'include/*.h', '*.cu', '*.cpp'],
-    }
+    },
+    include_package_data=True,
 )
