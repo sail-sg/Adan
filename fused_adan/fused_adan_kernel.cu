@@ -137,23 +137,17 @@ __global__ void adan_cuda_kernel<float, float>(
         step_size = lr / bias_correction1;
 
         if (no_prox){
-            // p[global_id] = p[global_id] * (1 - lr * decay) 
-            // p[global_id] = p[global_id] - step_size * exp_avg[global_id] / denom
-            // p[global_id] = p[global_id] - step_size_diff * exp_avg_diff[global_id] / denom
             new_p4.x = p4.x * (1 - lr * decay) - step_size * new_exp_avg4.x / denom4.x - step_size_diff * new_exp_avg_diff4.x / denom4.x;
             new_p4.y = p4.y * (1 - lr * decay) - step_size * new_exp_avg4.y / denom4.y - step_size_diff * new_exp_avg_diff4.y / denom4.y;
             new_p4.z = p4.z * (1 - lr * decay) - step_size * new_exp_avg4.z / denom4.z - step_size_diff * new_exp_avg_diff4.z / denom4.z;
             new_p4.w = p4.w * (1 - lr * decay) - step_size * new_exp_avg4.w / denom4.w - step_size_diff * new_exp_avg_diff4.w / denom4.w;
         }else{
-            // p[global_id] = p[global_id] - step_size * exp_avg[global_id] / denom
-            // p[global_id] = p[global_id] - step_size_diff * exp_avg_diff[global_id] / denom;
-            // p[global_id] = p[global_id] / (1 + lr * decay);
             new_p4.x = (p4.x - step_size * new_exp_avg4.x / denom4.x - step_size_diff * new_exp_avg_diff4.x / denom4.x) / (1 + lr * decay);
             new_p4.y = (p4.y - step_size * new_exp_avg4.y / denom4.y - step_size_diff * new_exp_avg_diff4.y / denom4.y) / (1 + lr * decay);
             new_p4.z = (p4.z - step_size * new_exp_avg4.z / denom4.z - step_size_diff * new_exp_avg_diff4.z / denom4.z) / (1 + lr * decay);
             new_p4.w = (p4.w - step_size * new_exp_avg4.w / denom4.w - step_size_diff * new_exp_avg_diff4.w / denom4.w) / (1 + lr * decay);
         }   
-        g4_ptr[global_id] = g4; // scaled_grad
+        g4_ptr[global_id] = g4;
         p4_ptr[global_id] = new_p4;
         exp_avg4_ptr[global_id] = new_exp_avg4;
         exp_avg_sq4_ptr[global_id] = new_exp_avg_sq4;

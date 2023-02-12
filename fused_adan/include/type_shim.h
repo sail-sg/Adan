@@ -7,10 +7,7 @@
 // {
 //   const at::Type& payload;
 //   TypeShim(const at::Type& type) : payload(type) {}
-//   // Enable trivial conversion to a const at::Type& for pre-3aeb78
 //   operator const at::Type&(){ return payload; };
-//   // Enable dispatch switch statements to take *this directly for  post-3aeb78
-//   //operator at::ScalarType(){ return payload.; };
 // };
 
 #define DISPATCH_FLOAT_AND_HALF(TYPE, LEVEL, NAME, ...) \

@@ -381,9 +381,6 @@ def _fused_adan_multi_tensor(
     clip_global_grad_norm: Tensor,
 ):
     import fused_adan
-    fused_adan = load(name="fused_adan",
-                   sources=['./fused_adan/pybind_adan.cpp','./fused_adan/fused_adan_kernel.cu', './fused_adan/multi_tensor_adan_kernel.cu'],
-                   verbose=True)
     multi_tensor_applier = MultiTensorApply(2048*32)
     _dummy_overflow_buf = torch.cuda.IntTensor([0])
     multi_tensor_applier(
@@ -436,10 +433,7 @@ def _fused_adan_single_tensor(
         exp_avg_diff = exp_avg_diffs[i]
         neg_grad = neg_pre_grads[i]
         with torch.cuda.device(param.device):
-            # import fused_adan
-            fused_adan = load(name="fused_adan",
-                   sources=['./fused_adan/pybind_adan.cpp','./fused_adan/fused_adan_kernel.cu', './fused_adan/multi_tensor_adan_kernel.cu'],
-                   verbose=True)
+            import fused_adan
             fused_adan.adan_single_tensor(
                 p_data_fp32,
                 out_p,

@@ -25,8 +25,8 @@ struct AdanFunctor
 {
    __device__ __forceinline__ void operator()(
     int chunk_size,
-    volatile int* noop_gmem, // Not used here, but needed to keep same
-    TensorListMetadata<6>& tl, // [0]:p, [1]:g, [2]:exp_avg, [3]:exp_avg_sq, [4]:exp_avg_diff, [5]:neg_grad
+    volatile int* noop_gmem,
+    TensorListMetadata<6>& tl,
     const float beta1,
     const float beta2,
     const float beta3,
@@ -72,7 +72,6 @@ struct AdanFunctor
 
     n -= chunk_idx*chunk_size;
 
-    // see note in multi_tensor_scale_kernel.cu
     for(int i_start = 0;
             i_start < n && i_start < chunk_size;
             i_start += blockDim.x*ILP)

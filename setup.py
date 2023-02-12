@@ -18,10 +18,10 @@ setup(
     ext_modules=[
         CUDAExtension(
             'fused_adan', 
-            sources=['./fused_adan/pybind_adan.cpp','./fused_adan/fused_adan_kernel.cu', './fused_adan/multi_tensor_adan_kernel.cu']
+            sources=['fused_adan/pybind_adan.cpp','./fused_adan/fused_adan_kernel.cu', './fused_adan/multi_tensor_adan_kernel.cu']
         )
     ],
-    # cmdclass={
-    #     'build_ext': BuildExtension
-    # }
+    cmdclass={
+        'build_ext': BuildExtension
+    }
 )
