@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='adan',
@@ -14,5 +14,7 @@ setup(
         'Xie, Xingyu and Zhou, Pan and Li, Huan and '
         'Lin, Zhouchen and Yan, Shuicheng'
     ),
+    packages=find_packages(where="fused_adan"),
+    package_dir={"": "fused_adan"},
     include_package_data=True,
 )
