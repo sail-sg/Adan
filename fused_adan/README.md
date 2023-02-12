@@ -1,8 +1,9 @@
 # Adan Optimizer fused kernel
 
 ## Compile Requirements
-1. Libtorch/Pytorch (Aten is required)
+1. Libtorch/Pytorch (ATen is required)
 2. CUDA Toolkit
+3. ninja
 
 ## Install
 1. `cd fused_adan`
