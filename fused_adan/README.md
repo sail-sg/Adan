@@ -1,7 +1,7 @@
 # Adan Optimizer fused kernel
 
 ## Compile Requirements
-1. Libtorch
+1. Libtorch/Pytorch (Aten is required)
 2. CUDA Toolkit
 
 ## Install
@@ -14,17 +14,18 @@
 Using `Adan(..., foreach=False, fused=True)` enable fused Adan kernel with single tensor access.  
 Using `Adan(..., foreach=True, fused=True)` enable fused Adan kernel with multi tensor access.
 
-`foreach=True` is recommended for better performance, with higher memory demand.
+`foreach=True` is recommended for better performance.
 
-## Test Results on Tesla T4, Mnist Dataset, simple 2 Layers CNN network
-Achieved active warps occupancy:
-* for single tensor access unfused: 36.53 %
-* for multi tensor access unfused: 41.96 %
-* for single tensor access fused: 43.09 %
-* for multi tensor access fused: 44.84 %
+<!-- ## File Structure
+```
+fused_adan
+├── include // fused kernel header files
+├── README.md 
+├── fused_adan_kernel.cu // single tensor fused kernel source files
+├── multi_tensor_adan_kernel.cu // multi tensor fused kernel source files
+├── pybind.cpp // pybind11 interface
+└── setup.py
+``` -->
 
-Wall Duration for *adan.py: step()*:
-* for single tensor access unfused: Avg. 2.82ms
-* for multi tensor access unfused: Avg. 0.86ms
-* for single tensor access fused: Avg. 1.24ms
-* for multi tensor access fused: Avg. 0.33ms
+
+## Test Results
