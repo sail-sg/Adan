@@ -14,7 +14,7 @@ setup(
         'Xie, Xingyu and Zhou, Pan and Li, Huan and '
         'Lin, Zhouchen and Yan, Shuicheng'
     ),
-    packages=find_packages(where="fused_adan"),
-    package_dir={"": "fused_adan"},
-    include_package_data=True,
+    packages=['fused_adan'],
+    package_dir={'fused_adan': 'fused_adan/', 'fused_adan/include': 'fused_adan/include/'},
+    package_data={'fused_adan': ['fused_adan/*.cu', 'fused_adan/*.cpp'], 'fused_adan/include': ['fused_adan/include/*.h', 'fused_adan/include/*.cuh']},
 )
