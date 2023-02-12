@@ -18,7 +18,6 @@ from typing import List
 import torch
 from torch import Tensor
 from torch.optim.optimizer import Optimizer
-from torch.utils.cpp_extension import load
 
 class MultiTensorApply(object):
     available = False
