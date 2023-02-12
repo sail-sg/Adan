@@ -24,5 +24,5 @@ setup(
         'Lin, Zhouchen and Yan, Shuicheng'
     ),
     ext_modules=[cuda_extension] if is_available() else [],
-    cmdclass={'build_ext': BuildExtension} if has_cuda() else {},
+    cmdclass={'build_ext': BuildExtension} if is_available() else {},
 )
