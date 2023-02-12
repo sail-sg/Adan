@@ -1,2 +1,0 @@
-recursive-include fused_adan *.cu *.cpp
-recursive-include fused_adan/include *.cuh *.h

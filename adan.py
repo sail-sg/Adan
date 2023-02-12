@@ -223,11 +223,18 @@ class Adan(Optimizer):
 
             if group['foreach']:
                 if group['fused']:
-                    _fused_adan_multi_tensor(**kwargs)
+                    if torch.cuda.is_available():
+                        _fused_adan_multi_tensor(**kwargs)
+                    else:
+                        raise ValueError(
+                            'Fused Adan does not support CPU')
                 else:
                     _multi_tensor_adan(**kwargs)
             elif group['fused']:
-                _fused_adan_single_tensor(**kwargs)
+                if torch.cuda.is_available():
+                    _fused_adan_single_tensor(**kwargs)
+                else:
+                    raise ValueError('Fused Adan does not support CPU')
             else:
                 _single_tensor_adan(**kwargs)
 
@@ -427,7 +434,6 @@ def _fused_adan_single_tensor(
         p_data_fp32 = param.data.float()
         out_p = param.data
         grad = grads[i]
-        # grad_copy = grad.clone().mul_(clip_global_grad_norm)
         exp_avg = exp_avgs[i]
         exp_avg_sq = exp_avg_sqs[i]
         exp_avg_diff = exp_avg_diffs[i]
@@ -454,5 +460,4 @@ def _fused_adan_single_tensor(
                 no_prox,
                 clip_global_grad_norm,
             )
-        # grad.mul_(clip_global_grad_norm)
         neg_grad.zero_().add_(grad, alpha=-1.0)
