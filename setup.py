@@ -14,4 +14,5 @@ setup(
         'Xie, Xingyu and Zhou, Pan and Li, Huan and '
         'Lin, Zhouchen and Yan, Shuicheng'
     ),
+    include_package_data=True,
 )
