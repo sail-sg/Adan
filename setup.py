@@ -1,4 +1,5 @@
-from setuptools import setup, find_packages
+from setuptools import setup
+from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
 setup(
     name='adan',
@@ -14,7 +15,13 @@ setup(
         'Xie, Xingyu and Zhou, Pan and Li, Huan and '
         'Lin, Zhouchen and Yan, Shuicheng'
     ),
-    packages=['fused_adan'],
-    package_dir={'fused_adan': 'fused_adan/', 'fused_adan/include': 'fused_adan/include/'},
-    package_data={'fused_adan': ['fused_adan/*.cu', 'fused_adan/*.cpp'], 'fused_adan/include': ['fused_adan/include/*.h', 'fused_adan/include/*.cuh']},
+    ext_modules=[
+        CUDAExtension(
+            'fused_adan', 
+            sources=['./fused_adan/pybind_adan.cpp','./fused_adan/fused_adan_kernel.cu', './fused_adan/multi_tensor_adan_kernel.cu']
+        )
+    ],
+    # cmdclass={
+    #     'build_ext': BuildExtension
+    # }
 )
