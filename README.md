@@ -13,13 +13,13 @@ This is an official PyTorch implementation of **Adan**. See the paper [here](htt
 
 ## News
 
-- :fire: :fire: :fire:Faster implementation with less memory footprint is released.
+- :fire: :fire: :fire:FusedAdan with less memory footprint is released.
 - Adan is supported in the lasted version of [`Timm`](https://github.com/rwightman/pytorch-image-models).
 - Results on large language models, like **GPT2**, are released.
 - Adan is chosen as the default optimizer in the text-to-3D [DreamFusion Project](https://github.com/ashawkey/stable-dreamfusion). See more results [here](./dreamfusion/).
 - TF's implementation (third party) refers to [DenisVorotyntsev/Adan](https://github.com/DenisVorotyntsev/Adan).
 - JAX's version (third party) is implemented and also supported in [Deepmind/optax](https://github.com/deepmind/optax).
-- Adan is supported in the [MMClassification](https://github.com/open-mmlab/mmclassification/tree/dev-1.x) of the [OpenMMLab](https://openmmlab.com/) project. The user can find the log and example of using Adan to train ViT-B [here](https://github.com/open-mmlab/mmclassification/pull/1180).
+- Adan is supported in the [MMClassification](https://github.com/open-mmlab/mmclassification/tree/dev-1.x) of the [OpenMMLab](https://openmmlab.com/) project. The user can find the log and example of using Adan to train ViT-B [here](https://github.com/open-mmlab/mmclassification/pull/1180). The results of the detection tasks are coming soon.
 
 ______________________________________________________________________
 
@@ -28,6 +28,21 @@ ______________________________________________________________________
 ```
 python3 -m pip install git+https://github.com/sail-sg/Adan.git
 ```
+
+FusedAdan is installed by default. A brief comparison of peak memory and wall duration for the optimizer is as follows. The duration time is the total time of 200 `optimizer.step()`. We further compare Adam and FusedAdan in great detail on GPT-2. See more results [here](./fused_adan/README.md).
+
+| Model      | Model Size (MB) | Adam Peak (MB) | Adan Peak (MB) | FusedAdan Peak (MB) | Adam Time (ms) | Adan Time (ms) | FusedAdan Time (ms) |
+| :--------- | :-------------: | :------------: | :------------: | :-----------------: | :------------: | :------------: | :-----------------: |
+| ResNet-50  |       25        |      7142      |      7195      |        7176         |      9.0       |      4.2       |         1.9         |
+| ResNet-101 |       44        |     10055      |     10215      |        10160        |      17.5      |      7.0       |         3.4         |
+| ViT-B      |       86        |      9755      |      9758      |        9758         |      8.9       |      12.3      |         4.3         |
+| Swin-B     |       87        |     16118      |     16202      |        16173        |      17.9      |      12.8      |         4.9         |
+| ConvNext-B |       88        |     17353      |     17389      |        17377        |      19.1      |      15.6      |         5.0         |
+| Swin-L     |       196       |     24299      |     24316      |        24310        |      17.5      |      28.1      |        10.1         |
+| ConvNext-L |       197       |     26025      |     26055      |        26044        |      18.6      |      31.1      |        10.2         |
+| ViT-L      |       304       |     25652      |     25658      |        25656        |      18.0      |      43.2      |        15.1         |
+| GPT-2      |       758       |     25096      |     25406      |        25100        |      49.9      |     107.7      |        37.4         |
+| GPT-2      |      1313       |     34357      |     38595      |        34363        |      81.8      |     186.0      |        64.4         |
 
 ## Usage
 

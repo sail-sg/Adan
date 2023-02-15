@@ -19,6 +19,7 @@ import torch
 from torch import Tensor
 from torch.optim.optimizer import Optimizer
 
+
 class MultiTensorApply(object):
     available = False
     warned = False
@@ -31,21 +32,8 @@ class MultiTensorApply(object):
             MultiTensorApply.available = False
             MultiTensorApply.import_err = err
 
-    def check_avail(self):
-        if MultiTensorApply.available == False:
-            raise RuntimeError(
-                "Attempted to call MultiTensorApply method, but MultiTensorApply "
-                "is not available, possibly because Apex was installed without "
-                "--cpp_ext --cuda_ext.  Original import error message:",
-                MultiTensorApply.import_err)
-
     def __call__(self, op, noop_flag_buffer, tensor_lists, *args):
-        self.check_avail()
-
-        return op(self.chunk_size,
-                  noop_flag_buffer,
-                  tensor_lists,
-                  *args)
+        return op(self.chunk_size, noop_flag_buffer, tensor_lists, *args)
 
 
 class Adan(Optimizer):
@@ -71,6 +59,8 @@ class Adan(Optimizer):
             (default: False)
         foreach (bool): if True would use torch._foreach implementation.
             It's faster but uses slightly more memory. (default: True)
+        fused (bool, optional): whether fused implementation is used.
+            (default: False)
     """
     def __init__(self,
                  params,
@@ -225,8 +215,7 @@ class Adan(Optimizer):
                     if torch.cuda.is_available():
                         _fused_adan_multi_tensor(**kwargs)
                     else:
-                        raise ValueError(
-                            'Fused Adan does not support CPU')
+                        raise ValueError('Fused Adan does not support CPU')
                 else:
                     _multi_tensor_adan(**kwargs)
             elif group['fused']:
@@ -366,6 +355,7 @@ def _multi_tensor_adan(
     torch._foreach_zero_(neg_pre_grads)
     torch._foreach_add_(neg_pre_grads, grads, alpha=-1.0)
 
+
 def _fused_adan_multi_tensor(
     params: List[Tensor],
     grads: List[Tensor],
@@ -387,24 +377,14 @@ def _fused_adan_multi_tensor(
     clip_global_grad_norm: Tensor,
 ):
     import fused_adan
-    multi_tensor_applier = MultiTensorApply(2048*32)
+    multi_tensor_applier = MultiTensorApply(2048 * 32)
     _dummy_overflow_buf = torch.cuda.IntTensor([0])
     multi_tensor_applier(
-        fused_adan.adan_multi_tensor,
-        _dummy_overflow_buf,
+        fused_adan.adan_multi_tensor, _dummy_overflow_buf,
         [params, grads, exp_avgs, exp_avg_sqs, exp_avg_diffs, neg_pre_grads],
-        beta1,
-        beta2,
-        beta3,
-        bias_correction1,
-        bias_correction2,
-        bias_correction3_sqrt,
-        lr,
-        weight_decay,
-        eps,
-        no_prox,
-        clip_global_grad_norm
-    )
+        beta1, beta2, beta3, bias_correction1, bias_correction2,
+        bias_correction3_sqrt, lr, weight_decay, eps, no_prox,
+        clip_global_grad_norm)
     torch._foreach_zero_(neg_pre_grads)
     torch._foreach_add_(neg_pre_grads, grads, alpha=-1.0)
 
