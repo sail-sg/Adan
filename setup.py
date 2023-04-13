@@ -14,7 +14,7 @@ build_cuda_ext = is_available() or os.getenv('FORCE_CUDA', '0') == '1'
 setup(
     name='adan',
     python_requires='>=3.8',
-    version='0.0.1',
+    version='0.0.2',
     install_requires=['torch'],
     py_modules=['adan'],
     description=(
