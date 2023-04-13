@@ -87,6 +87,9 @@ class Adan(Optimizer):
         if not 0.0 <= betas[2] < 1.0:
             raise ValueError('Invalid beta parameter at index 2: {}'.format(
                 betas[2]))
+        if fused:
+            _check_fused_available()
+
         defaults = dict(lr=lr,
                         betas=betas,
                         eps=eps,
@@ -440,3 +443,24 @@ def _fused_adan_single_tensor(
                 clip_global_grad_norm,
             )
         neg_grad.zero_().add_(grad, alpha=-1.0)
+
+
+def _check_fused_available():
+    try:
+        import fused_adan
+    except ImportError as exc:
+        if torch.cuda.is_available():
+            # The module should be available but isn't. Try to
+            # help the user in this case.
+            raise ImportError((
+                str(exc)
+                + (
+                    '\nThis could be caused by not having compiled '
+                    'the CUDA extension during package installation. '
+                    'Please try to re-install the package with '
+                    'the environment flag `FORCE_CUDA=1` set.'
+                )
+            ))
+        else:
+            raise ImportError(
+                str(exc) + '\nFused Adan does not support CPU.')
