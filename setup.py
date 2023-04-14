@@ -1,10 +1,15 @@
 import os
+import sys
 from setuptools import setup
 
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 from torch.cuda import is_available
 
-cuda_extension = CUDAExtension(
+if "--unfused" in sys.argv:
+    print("Building unfused version of adan")
+    sys.argv.remove("--unfused")
+else:
+    cuda_extension = CUDAExtension(
             'fused_adan', 
             sources=['fused_adan/pybind_adan.cpp','./fused_adan/fused_adan_kernel.cu', './fused_adan/multi_tensor_adan_kernel.cu']
         )
