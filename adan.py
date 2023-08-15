@@ -193,6 +193,9 @@ class Adan(Optimizer):
                 exp_avg_diffs.append(state['exp_avg_diff'])
                 neg_pre_grads.append(state['neg_pre_grad'])
 
+            if not params_with_grad:
+                continue
+
             kwargs = dict(
                 params=params_with_grad,
                 grads=grads,
