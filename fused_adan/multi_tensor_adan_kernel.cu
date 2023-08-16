@@ -165,6 +165,10 @@ void multi_tensor_adan_cuda(
   const float clip_global_grad_norm)
 {
   using namespace at;
+  TORCH_CHECK(!tensor_lists.empty(), "tensor list cannot be empty")
+  if (tensor_lists[0].empty()) {
+    return;
+  }
 
   // Assume single type across p,g,m1,m2 now
   DISPATCH_DOUBLE_FLOAT_HALF_AND_BFLOAT(
