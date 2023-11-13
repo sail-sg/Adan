@@ -11,15 +11,21 @@ This is an official PyTorch implementation of **Adan**. See the paper [here](htt
 }
 ```
 
-## News
-
-- :fire: :fire: :fire:FusedAdan with less memory footprint is released.
-- Adan is supported in the lasted version of [`Timm`](https://github.com/rwightman/pytorch-image-models).
-- Results on large language models, like **GPT2**, are released.
-- Adan is chosen as the default optimizer in the text-to-3D [DreamFusion Project](https://github.com/ashawkey/stable-dreamfusion). See more results [here](./dreamfusion/).
+## Supported Projects
+- Adan is supported in the Project [D-Adaptation](https://github.com/facebookresearch/dadaptation) from [Meta AI](https://github.com/facebookresearch).
+- Adan will be supported in the Project [Paddle](https://github.com/PaddlePaddle/Paddle/pull/55048#commits-pushed-563d32c) from [Baidu(百度飞浆)](https://github.com/PaddlePaddle/Paddle).
+- Adan is supported in [Timm](https://github.com/rwightman/pytorch-image-models) from [Huggingface](https://github.com/huggingface)
+- Adan is the default optimizer in the text-to-3D [DreamFusion Project](https://github.com/ashawkey/stable-dreamfusion). See more results [here](./dreamfusion/).
+- Adan is supported in the [MMClassification](https://github.com/open-mmlab/mmclassification/tree/dev-1.x) of the [OpenMMLab](https://openmmlab.com/) project. The log and example of using Adan to train ViT-B is [here](https://github.com/open-mmlab/mmclassification/pull/1180).
 - TF's implementation (third party) refers to [DenisVorotyntsev/Adan](https://github.com/DenisVorotyntsev/Adan).
 - JAX's version (third party) is implemented and also supported in [Deepmind/optax](https://github.com/deepmind/optax).
-- Adan is supported in the [MMClassification](https://github.com/open-mmlab/mmclassification/tree/dev-1.x) of the [OpenMMLab](https://openmmlab.com/) project. The user can find the log and example of using Adan to train ViT-B [here](https://github.com/open-mmlab/mmclassification/pull/1180). The results of the detection tasks are coming soon.
+
+  
+## News
+- :fire: :fire: :fire:FusedAdan with less memory footprint is released.
+- Results on large language models, like **GPT2**, are released.
+
+
 
 ______________________________________________________________________
 
