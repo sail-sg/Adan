@@ -12,6 +12,8 @@ This is an official PyTorch implementation of **Adan**. See the paper [here](htt
 ```
 
 ## Supported Projects
+- Adan is supported in the framework [NeMo](https://github.com/NVIDIA/NeMo/blob/main/nemo/core/optim/adan.py) from [NVIDIA](https://github.com/NVIDIA/NeMo).
+- Adan is the default optimizer for Masked Diffusion Transformer V2. See more details [MDT V2](https://github.com/sail-sg/MDT).
 - Adan is supported in the Project [D-Adaptation](https://github.com/facebookresearch/dadaptation) from [Meta AI](https://github.com/facebookresearch).
 - Adan will be supported in the Project [Paddle](https://github.com/PaddlePaddle/Paddle/pull/55048#commits-pushed-563d32c) from [Baidu(百度飞浆)](https://github.com/PaddlePaddle/Paddle).
 - Adan is supported in [Timm](https://github.com/rwightman/pytorch-image-models) from [Huggingface](https://github.com/huggingface)
