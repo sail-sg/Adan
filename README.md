@@ -3,11 +3,12 @@
 This is an official PyTorch implementation of **Adan**. See the paper [here](https://arxiv.org/abs/2208.06677). If you find our adan helpful or heuristic to your projects, please cite this paper and also star this repository. Thanks!
 
 ```tex
-@article{xie2022adan,
+@article{xie2024adan,
   title={Adan: Adaptive Nesterov Momentum Algorithm for Faster Optimizing Deep Models},
   author={Xie, Xingyu and Zhou, Pan and Li, Huan and Lin, Zhouchen and Yan, Shuicheng},
-  journal={arXiv preprint arXiv:2208.06677},
-  year={2022}
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  year={2024},
+  publisher={IEEE}
 }
 ```
 
@@ -25,9 +26,8 @@ This is an official PyTorch implementation of **Adan**. See the paper [here](htt
 
   
 ## News
-- :fire: :fire: :fire:FusedAdan with less memory footprint is released.
-- Results on large language models, like **GPT2**, are released.
-
+- :fire::fire::fire: Results on large language models, like **MoE and GPT2**, are released.
+- FusedAdan with less memory footprint is released.
 
 
 ______________________________________________________________________
@@ -44,28 +44,13 @@ cd Adan
 python3 setup.py install --unfused
 ```
 
-A brief comparison of peak memory and wall duration for the optimizer is as follows. The duration time is the total time of 200 `optimizer.step()`. We further compare Adam and FusedAdan in great detail on GPT-2. See more results [here](./fused_adan/README.md).
-
-| Model      | Model Size (MB) | Adam Peak (MB) | Adan Peak (MB) | FusedAdan Peak (MB) | Adam Time (ms) | Adan Time (ms) | FusedAdan Time (ms) |
-| :--------- | :-------------: | :------------: | :------------: | :-----------------: | :------------: | :------------: | :-----------------: |
-| ResNet-50  |       25        |      7142      |      7195      |        7176         |      9.0       |      4.2       |         1.9         |
-| ResNet-101 |       44        |     10055      |     10215      |        10160        |      17.5      |      7.0       |         3.4         |
-| ViT-B      |       86        |      9755      |      9758      |        9758         |      8.9       |      12.3      |         4.3         |
-| Swin-B     |       87        |     16118      |     16202      |        16173        |      17.9      |      12.8      |         4.9         |
-| ConvNext-B |       88        |     17353      |     17389      |        17377        |      19.1      |      15.6      |         5.0         |
-| Swin-L     |       196       |     24299      |     24316      |        24310        |      17.5      |      28.1      |        10.1         |
-| ConvNext-L |       197       |     26025      |     26055      |        26044        |      18.6      |      31.1      |        10.2         |
-| ViT-L      |       304       |     25652      |     25658      |        25656        |      18.0      |      43.2      |        15.1         |
-| GPT-2      |       758       |     25096      |     25406      |        25100        |      49.9      |     107.7      |        37.4         |
-| GPT-2      |      1313       |     34357      |     38595      |        34363        |      81.8      |     186.0      |        64.4         |
-
 ## Usage
 
 For your convenience to use Adan, we briefly provide some intuitive instructions below, then provide some general experimental tips, and finally provide more details (e.g., specific commands and hyper-parameters) for each experiment in the paper.
 
 #### 1) Two steps to use Adan
 
-**Step 1.** add Adan-dependent hyper-parameters by adding the following hyper-parameters to the config:
+**Step 1.** Add Adan-dependent hyper-parameters by adding the following hyper-parameters to the config:
 
 ```python
 parser.add_argument('--max-grad-norm', type=float, default=0.0, help='if the l2 norm is large than this hyper-parameter, then we clip the gradient  (default: 0.0, no gradient clip)')
@@ -77,18 +62,17 @@ parser.add_argument('--no-prox', action='store_true', default=False, help='wheth
 
 `opt-betas`: To keep consistent with our usage habits, the $\beta$'s in the paper are actually the $(1-\beta)$'s in the code.
 
-`foreach (bool)`: If `True`, Adan would use `torch._foreach` implementation. It is faster but uses slightly more memory.
+`foreach (bool)`: If `True`, Adan will use the `torch._foreach` implementation. It is faster but uses slightly more memory.
 
 `no-prox`: It determines the update rule of parameters with weight decay. By default, Adan updates the parameters in the way presented in Algorithm 1 in the paper:
 
-$$\boldsymbol{\theta}\_{k+1} = ( 1+\lambda \eta)^{-1}\left[\boldsymbol{\theta}\_k - \boldsymbol{\eta}\_k \circ (\mathbf{m}\_k+(1-{\color{blue}\beta_2})\mathbf{v}_k)\right],$$_
+$$\boldsymbol{\theta}\_{k+1} = ( 1+\lambda \eta)^{-1} \left[\boldsymbol{\theta}\_k - \boldsymbol{\eta}\_k \circ (\mathbf{m}\_k+(1-{\color{blue}\beta_2})\mathbf{v}_k)\right]$$
 
-But one also can update the parameter like Adamw:
+But one can also update the parameter like Adamw:
 
 $$\boldsymbol{\theta}\_{k+1} = ( 1-\lambda \eta)\boldsymbol{\theta}\_k - \boldsymbol{\eta}\_k \circ (\mathbf{m}\_k+(1-{\color{blue}\beta_2})\mathbf{v}\_k).$$
-In all experiments, we set `no-prox=False` in our paper.
 
-**Step 2.** create the Adan optimizer as follows. In this step, we can directly replace the vanilla optimizer by using the following command:
+**Step 2.** Create the Adan optimizer as follows. In this step, we can directly replace the vanilla optimizer by using the following command:
 
 ```python
 from adan import Adan
@@ -100,7 +84,6 @@ optimizer = Adan(param, lr=args.lr, weight_decay=args.weight_decay, betas=args.o
 - To make Adan simple, in all experiments except Table 12 in the paper, we do not use the restart strategy in Adan. But Table 12 shows that the restart strategy can further slightly improve the performance of Adan.
 - Adan often allows one to use a large peak learning rate which often fails other optimizers, e.g., Adam and AdamW. For example, in all experiments except for the MAE pre-training and LSTM, the learning rate used by Adan is **5-10 times** larger than that in Adam/AdamW.
 - Adan is relatively robust to `beta1`, `beta2,` and `beta3`, especially for `beta2`. If you want better performance, you can first tune `beta3` and then `beta1`.
-- Interestingly, we found that `weight_decay = 0.02` is suitable for all experiments in our paper.
 - Adan has a slightly higher GPU memory cost than Adam/AdamW on a single node. However, this problem can be solved using the [ZeroRedundancyOptimizer](https://pytorch.org/tutorials/recipes/zero_redundancy_optimizer.html), which shares optimizer states across distributed data-parallel processes to reduce per-process memory footprint. Specifically, when using the `ZeroRedundancyOptimizer` on more than two GPUs, **Adan and Adam consume almost the same amount of memory.**
 
 #### 3) More extra detailed steps&results
@@ -114,7 +97,34 @@ Please refer to the following links for detailed steps. In these detailed steps,
 - [Instruction](./gpt2/) for **<u>GPT2</u>**
 - [Resutls](./dreamfusion/) for **<u> text-to-3D DreamFusion</u>**.
 
-## Model Zoo
+## Results for Various Tasks
+
+### Results on Large Language Models
+
+#### Mixture of Experts (MoE)
+To investigate the efficacy of the Adan optimizer for LLMs, we conducted pre-training experiments using [MoE models](https://arxiv.org/pdf/2406.06563). The experiments utilized the [RedPajama-v2 dataset](https://github.com/togethercomputer/RedPajama-Data) with three configurations, each consisting of 8 experts: **8x0.1B** (totaling 0.5B trainable parameters), **8x0.3B** (2B trainable parameters), and **8x0.6B** (4B trainable parameters). These models were trained with sampled data comprising **10B, 30B, 100B, and 300B tokens**, respectively.
+
+| Model Size |   8x0.1B  |   8x0.1B  |   8x0.1B  |   8x0.3B  |   8x0.3B  |   8x0.3B  |   8x0.6B  |
+|:----------:|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
+| Token Size |    10B    |    30B    |    100B   |    30B    |    100B   |    300B   |    300B   |
+|    AdamW   |   2.722   |   2.550   |   2.427   |   2.362   |   2.218   |   2.070   |   2.023   |
+|    Adan    | **2.697** | **2.513** | **2.404** | **2.349** | **2.206** | **2.045** | **2.010** |
+
+<p align="center">
+  <img src="https://github.com/sail-sg/Adan/assets/10042844/4c69c8d2-cb52-4c96-8d6b-574adc8ca775" width="58%" />
+  <img src="https://github.com/sail-sg/Adan/assets/10042844/d8d79ee3-c19c-4cdf-9ba0-939d030f49a9" width="40%" />
+</p>
+
+#### GPT2-345m
+
+We provide the config and log for GPT2-345m pre-trained on the dataset that comes from [BigCode](https://www.bigcode-project.org/) and evaluated on the [HumanEval](https://github.com/openai/human-eval) dataset by zero-shot learning. [HumanEval](https://github.com/openai/human-eval) is used to measure functional correctness for synthesizing programs from docstrings. It consists of 164 original programming problems, assessing language comprehension, algorithms, and simple mathematics, with some comparable to simple software interview questions. We set ` Temperature = 0.8` during evaluation.
+
+|                  | Steps | pass@1 | pass@10 | pass@100 |                                  Download                                  |
+| ---------------- | :---: | :----: | :-----: | :------: | :------------------------------------------------------------------------: |
+| GPT2-345m (Adam) | 300k  | 0.0840 |  0.209  |  0.360   | [log&config](https://github.com/sail-sg/Adan/files/10362486/gpt2-adam.log) |
+| GPT2-345m (Adan) | 150k  | 0.0843 |  0.221  |  0.377   | [log&config](https://github.com/sail-sg/Adan/files/10362485/gpt2-adan.log) |
+
+<u>**Adan obtains comparable results with only half cost**</u>.
 
 ### Results on vision tasks
 
@@ -190,6 +200,23 @@ We provide the config and log for GPT2-345m pre-trained on the dataset that come
 We show the results of the text-to-3D task supported by the [DreamFusion Project](https://github.com/ashawkey/stable-dreamfusion). More visualization results could be founded [here](./dreamfusion/).
 Examples generated from text prompt `Sydney opera house, aerial view` with Adam and Adan:
 
-https://user-images.githubusercontent.com/10042844/211014601-da430196-021d-4f6b-962b-8441feff5d02.mp4
+[![Video 1](https://user-images.githubusercontent.com/path_to_video_preview_image.jpg)](https://user-images.githubusercontent.com/10042844/211014601-da430196-021d-4f6b-962b-8441feff5d02.mp4)
 
-https://user-images.githubusercontent.com/10042844/211014594-3b5c05e3-9018-4a39-b5db-d6f2fc111cce.mp4
+[![Video 2](https://user-images.githubusercontent.com/path_to_video_preview_image.jpg)](https://user-images.githubusercontent.com/10042844/211014594-3b5c05e3-9018-4a39-b5db-d6f2fc111cce.mp4)
+
+
+## Memory and Efficiency
+A brief comparison of peak memory and wall duration for the optimizer is as follows. The duration time is the total time of 200 `optimizer.step()`. We further compare Adam and FusedAdan in great detail on GPT-2. See more results [here](./fused_adan/README.md).
+
+| Model      | Model Size (MB) | Adam Peak (MB) | Adan Peak (MB) | FusedAdan Peak (MB) | Adam Time (ms) | Adan Time (ms) | FusedAdan Time (ms) |
+| :--------- | :-------------: | :------------: | :------------: | :-----------------: | :------------: | :------------: | :-----------------: |
+| ResNet-50  |       25        |      7142      |      7195      |        7176         |      9.0       |      4.2       |         1.9         |
+| ResNet-101 |       44        |     10055      |     10215      |        10160        |      17.5      |      7.0       |         3.4         |
+| ViT-B      |       86        |      9755      |      9758      |        9758         |      8.9       |      12.3      |         4.3         |
+| Swin-B     |       87        |     16118      |     16202      |        16173        |      17.9      |      12.8      |         4.9         |
+| ConvNext-B |       88        |     17353      |     17389      |        17377        |      19.1      |      15.6      |         5.0         |
+| Swin-L     |       196       |     24299      |     24316      |        24310        |      17.5      |      28.1      |        10.1         |
+| ConvNext-L |       197       |     26025      |     26055      |        26044        |      18.6      |      31.1      |        10.2         |
+| ViT-L      |       304       |     25652      |     25658      |        25656        |      18.0      |      43.2      |        15.1         |
+| GPT-2      |       758       |     25096      |     25406      |        25100        |      49.9      |     107.7      |        37.4         |
+| GPT-2      |      1313       |     34357      |     38595      |        34363        |      81.8      |     186.0      |        64.4         |
