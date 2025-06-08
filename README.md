@@ -13,6 +13,7 @@ This is an official PyTorch implementation of **Adan**. See the paper [here](htt
 ```
 
 ## Supported Projects
+- Riemannian version of Adan (Radan), included in [Manify](https://github.com/pchlenski/manify) — a non-Euclidean machine learning library.
 - Adan is supported in the framework [NeMo](https://github.com/NVIDIA/NeMo/blob/main/nemo/core/optim/adan.py) from [NVIDIA](https://github.com/NVIDIA/NeMo).
 - Adan is the default optimizer for the High-Fidelity Text-to-3D Generation Project. See more details [Consistent3D](https://github.com/sail-sg/Consistent3D).
 - Adan is the default optimizer for Masked Diffusion Transformer V2. See more details [MDT V2](https://github.com/sail-sg/MDT).
